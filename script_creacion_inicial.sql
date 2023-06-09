@@ -249,29 +249,6 @@ BEGIN
 END
 GO
 
-
-CREATE PROCEDURE D_DE_DATOS.MigrarEnvios
-AS
-BEGIN
-	INSERT INTO D_DE_DATOS.ENVIOS (cod_direccion_usuario, precio_envio, propina_envio, cod_repartidor, cod_localidad,cod_pedido)
-	SELECT DISTINCT
-		DU.cod_direccion_usuario,
-		M.PEDIDO_PRECIO_ENVIO,
-		M.PEDIDO_PROPINA,
-		R.cod_repartidor,
-		L.cod_localidad,
-		P.cod_pedido
-	FROM
-		gd_esquema.Maestra M
-		INNER JOIN D_DE_DATOS.LOCALIDADES L ON M.LOCAL_LOCALIDAD = L.nombre_localidad
-		INNER JOIN D_DE_DATOS.DIRECCIONES_USUARIOS DU ON M.DIRECCION_USUARIO_DIRECCION = DU.desc_direccion_usuario
-														AND L.cod_localidad = DU.cod_localidad
-		INNER JOIN D_DE_DATOS.REPARTIDORES R ON M.REPARTIDOR_DNI = R.dni_repartidor
-		INNER JOIN D_DE_DATOS.PEDIDOS P ON M.PEDIDO_NRO = P.cod_pedido
-		WHERE M.PEDIDO_PRECIO_ENVIO IS NOT NULL
-END
-GO
-
 CREATE PROCEDURE D_DE_DATOS.MigrarPedidos
 AS
 BEGIN
@@ -298,6 +275,28 @@ BEGIN
 		INNER JOIN D_DE_DATOS.MEDIOS_PAGO MP ON M.MEDIO_PAGO_NRO_TARJETA = MP.tarjeta_nro AND M.USUARIO_DNI = U.DNI_usuario
 		INNER JOIN D_DE_DATOS.ESTADOS_PEDIDOS EP ON M.PEDIDO_ESTADO = EP.desc_estado_pedido
 	WHERE PEDIDO_NRO is not null
+END
+GO
+
+CREATE PROCEDURE D_DE_DATOS.MigrarEnvios
+AS
+BEGIN
+	INSERT INTO D_DE_DATOS.ENVIOS (cod_direccion_usuario, precio_envio, propina_envio, cod_repartidor, cod_localidad,cod_pedido)
+	SELECT DISTINCT
+		DU.cod_direccion_usuario,
+		M.PEDIDO_PRECIO_ENVIO,
+		M.PEDIDO_PROPINA,
+		R.cod_repartidor,
+		L.cod_localidad,
+		P.cod_pedido
+	FROM
+		gd_esquema.Maestra M
+		INNER JOIN D_DE_DATOS.LOCALIDADES L ON M.LOCAL_LOCALIDAD = L.nombre_localidad
+		INNER JOIN D_DE_DATOS.DIRECCIONES_USUARIOS DU ON M.DIRECCION_USUARIO_DIRECCION = DU.desc_direccion_usuario
+														AND L.cod_localidad = DU.cod_localidad
+		INNER JOIN D_DE_DATOS.REPARTIDORES R ON M.REPARTIDOR_DNI = R.dni_repartidor
+		INNER JOIN D_DE_DATOS.PEDIDOS P ON M.PEDIDO_NRO = P.cod_pedido
+		WHERE M.PEDIDO_PRECIO_ENVIO IS NOT NULL
 END
 GO
 
