@@ -768,7 +768,7 @@ EXECUTE D_DE_DATOS.MigrarPedidos;
 -- EXECUTE D_DE_DATOS.MigrarItems;
 EXECUTE D_DE_DATOS.MigrarCuponesDescuento;
 -- EXECUTE D_DE_DATOS.MigrarPedidosCupon;
--- EXECUTE D_DE_DATOS.MigrarReclamos;
+EXECUTE D_DE_DATOS.MigrarReclamos;
 -- EXECUTE D_DE_DATOS.MigrarReclamosCupon;
 EXECUTE D_DE_DATOS.MigrarServiciosMensajeria;
 
