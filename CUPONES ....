@@ -1,5 +1,18 @@
 -- CUPONES CREACION
 
+CREATE TABLE D_DE_DATOS.CUPONES_DESCUENTO (
+	cod_cupon INT  IDENTITY(1,1) PRIMARY KEY,
+	cod_cupon_anterior INT NULL,
+	cod_usuario INT NOT NULL,
+	monto_cupon DECIMAL (18,2) NOT NULL,
+	fecha_alta_cupon DATETIME2(3) NOT NULL,
+	fecha_vencimiento_cupon DATETIME2(3) NOT NULL,
+	cod_tipo_cupon INT NOT NULL,
+	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
+	FOREIGN KEY (cod_tipo_cupon) REFERENCES D_DE_DATOS.tipos_cupones
+);
+
+
 CREATE TABLE D_DE_DATOS.RECLAMOS_CUPON (
 	cod_reclamo INT NOT NULL,
 	cod_cupon INT NOT NULL,
@@ -14,18 +27,6 @@ CREATE TABLE D_DE_DATOS.PEDIDOS_CUPON (
 	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.pedidos,
 	FOREIGN KEY (cod_cupon) REFERENCES D_DE_DATOS.cupones_descuento,
 	PRIMARY KEY (cod_pedido, cod_cupon)
-);
-
-CREATE TABLE D_DE_DATOS.CUPONES_DESCUENTO (
-	cod_cupon INT  IDENTITY(1,1) PRIMARY KEY,
-	cod_cupon_anterior INT NULL,
-	cod_usuario INT NOT NULL,
-	monto_cupon DECIMAL (18,2) NOT NULL,
-	fecha_alta_cupon DATETIME2(3) NOT NULL,
-	fecha_vencimiento_cupon DATETIME2(3) NOT NULL,
-	cod_tipo_cupon INT NOT NULL,
-	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
-	FOREIGN KEY (cod_tipo_cupon) REFERENCES D_DE_DATOS.tipos_cupones
 );
 
 
