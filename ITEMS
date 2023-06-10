@@ -33,8 +33,8 @@ CREATE TABLE D_DE_DATOS.PRODUCTOS_LOCALES (
 
 	CREATE TABLE D_DE_DATOS.ITEMS (
     cod_item INT IDENTITY(1,1) PRIMARY KEY,
-    cod_productos_locales INT  NULL,
-    cod_pedido INT  NULL,
+    cod_productos_locales NOT NULL,
+    cod_pedido NOT NULL,
     cantidad_item INT NOT NULL,
     precio_unitario_item DECIMAL(18,2) NOT NULL,
     FOREIGN KEY (cod_productos_locales) REFERENCES esquemaPrueba.PRODUCTOS_LOCALES,
