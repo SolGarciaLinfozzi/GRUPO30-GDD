@@ -217,14 +217,20 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE D_DE_DATOS.MigrarProductos
+CREATE PROCEDURE D_DE_DATOS.MigrarProductosLocales
 AS
 BEGIN
-	INSERT INTO D_DE_DATOS.PRODUCTOS (cod_local, nombre_producto, desc_producto, precio_unitario_producto)
-	SELECT DISTINCT L.cod_local, PRODUCTO_LOCAL_NOMBRE, PRODUCTO_LOCAL_DESCRIPCION, PRODUCTO_LOCAL_PRECIO
-	from gd_esquema.Maestra M
-	INNER JOIN D_DE_DATOS.LOCALES L ON L.nombre_local = M.LOCAL_NOMBRE
-	WHERE M.PRODUCTO_LOCAL_NOMBRE IS NOT NULL
+	INSERT INTO D_DE_DATOS.PRODUCTOS_LOCALES (cod_producto, nombre_producto, desc_producto, precio_unitario_producto,cod_local,nombre_local)
+	SELECT DISTINCT 
+	PRODUCTO_LOCAL_CODIGO,
+	PRODUCTO_LOCAL_NOMBRE, 
+	PRODUCTO_LOCAL_DESCRIPCION, 
+	PRODUCTO_LOCAL_PRECIO,
+	L.cod_local,
+	M.LOCAL_NOMBRE
+	FROM gd_esquema.Maestra M
+	INNER JOIN D_DE_DATOS.LOCALES L ON M.LOCAL_NOMBRE = L.nombre_local AND M.LOCAL_DIRECCION = L.direccion_local
+	WHERE M.PRODUCTO_LOCAL_CODIGO IS NOT NULL AND M.LOCAL_NOMBRE IS NOT NULL
 END
 GO
 
@@ -304,23 +310,16 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MigrarItems
 AS
 BEGIN
-	INSERT INTO D_DE_DATOS.ITEMS (cod_producto, cod_pedido, cantidad_item, precio_unitario_item)
-	SELECT DISTINCT
-		P.cod_producto,
-		PE.cod_pedido,
-		M.PRODUCTO_CANTIDAD,
-		M.PRODUCTO_LOCAL_PRECIO
-	FROM
-	gd_esquema.Maestra M
-			INNER JOIN D_DE_DATOS.PRODUCTOS P ON M.PRODUCTO_LOCAL_NOMBRE = P.nombre_producto 
-			AND M.PRODUCTO_LOCAL_PRECIO = P.precio_unitario_producto
-
-			INNER JOIN D_DE_DATOS.PEDIDOS PE ON M.PEDIDO_FECHA = PE.fecha_pedido AND M.PEDIDO_TOTAL_SERVICIO = PE.total_pedido
-			INNER JOIN D_DE_DATOS.USUARIOS U ON M.USUARIO_DNI = U.DNI_usuario
-			INNER JOIN D_DE_DATOS.LOCALES L ON M.LOCAL_NOMBRE = L.nombre_local
-
-	WHERE M.PEDIDO_NRO IS NOT NULL
-		AND M.RECLAMO_NRO IS NULL;
+	INSERT INTO D_DE_DATOS.ITEMS (cod_productos_locales, cod_pedido, cantidad_item,precio_unitario_item)
+	SELECT
+	P.cod_productos_locales,
+	PE.cod_pedido,
+	M.PRODUCTO_CANTIDAD,
+	M.PRODUCTO_LOCAL_PRECIO
+	FROM gd_esquema.Maestra M
+	INNER JOIN D_DE_DATOS.PEDIDOS PE ON M.PEDIDO_NRO = PE.cod_pedido
+	INNER JOIN D_DE_DATOS.PRODUCTOS_LOCALES P ON P.nombre_local = M.LOCAL_NOMBRE AND P.cod_producto = M.PRODUCTO_LOCAL_CODIGO
+	WHERE M.PEDIDO_NRO IS NOT NULL AND M.PRODUCTO_LOCAL_CODIGO IS NOT NULL AND M.RECLAMO_NRO IS NULL;
 END
 GO
 
@@ -328,27 +327,27 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MigrarCuponesDescuento
 AS
 BEGIN
-	INSERT INTO D_DE_DATOS.CUPONES_DESCUENTO(cod_usuario,monto_cupon,fecha_alta_cupon,fecha_vencimiento_cupon,cod_tipo_cupon)
+	INSERT INTO D_DE_DATOS.CUPONES_DESCUENTO(cod_cupon_anterior,cod_usuario,monto_cupon,fecha_alta_cupon,fecha_vencimiento_cupon,cod_tipo_cupon)
 	SELECT DISTINCT
+		M.CUPON_NRO,
 		U.cod_usuario,
 		M.CUPON_MONTO,
 		M.CUPON_FECHA_ALTA,
 		M.CUPON_FECHA_VENCIMIENTO,
 		T.cod_tipo_cupon
-	FROM
-	gd_esquema.Maestra M
+	FROM gd_esquema.Maestra M
 			INNER JOIN D_DE_DATOS.USUARIOS U ON M.USUARIO_DNI = U.DNI_usuario 
 			INNER JOIN D_DE_DATOS.TIPOS_CUPONES T ON M.CUPON_TIPO = T.desc_tipo_cupon
 	WHERE CUPON_NRO IS NOT NULL
 	UNION
-	SELECT DISTINCT
+	SELECT DISTINCT 
+		M.CUPON_RECLAMO_NRO,
 		U.cod_usuario,
 		M.CUPON_RECLAMO_MONTO,
 		M.CUPON_RECLAMO_FECHA_ALTA,
 		M.CUPON_RECLAMO_FECHA_VENCIMIENTO,
 		T.cod_tipo_cupon
-	FROM
-	gd_esquema.Maestra M
+	FROM gd_esquema.Maestra M
 			INNER JOIN D_DE_DATOS.USUARIOS U ON M.USUARIO_DNI = U.DNI_usuario 
 			INNER JOIN D_DE_DATOS.TIPOS_CUPONES T ON M.CUPON_RECLAMO_TIPO = T.desc_tipo_cupon
 	WHERE CUPON_RECLAMO_NRO IS NOT NULL;
@@ -358,19 +357,14 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MigrarPedidosCupon
 AS
 BEGIN
-	INSERT INTO D_DE_DATOS.PEDIDOS_CUPON(cod_pedido,cod_cupon)
+	INSERT INTO D_DE_DATOS.PEDIDOS_CUPON(cod_pedido,cod_cupon)  
 	SELECT DISTINCT
 		PE.cod_pedido,
 		C.cod_cupon
-	FROM
-	gd_esquema.Maestra M
-		INNER JOIN D_DE_DATOS.PEDIDOS PE ON M.PEDIDO_FECHA = PE.fecha_pedido AND M.PEDIDO_TOTAL_SERVICIO = PE.total_pedido
-		INNER JOIN D_DE_DATOS.USUARIOS U ON M.USUARIO_DNI = U.DNI_usuario
-		INNER JOIN D_DE_DATOS.LOCALES L ON M.LOCAL_NOMBRE = L.nombre_local
-
-		INNER JOIN D_DE_DATOS.CUPONES_DESCUENTO C ON M.CUPON_MONTO = C.monto_cupon AND M.CUPON_FECHA_ALTA = C.fecha_alta_cupon AND M.CUPON_FECHA_VENCIMIENTO = C.fecha_vencimiento_cupon
-		
-	WHERE PEDIDO_NRO IS NOT NULL AND RECLAMO_NRO IS NULL AND CUPON_NRO IS NOT NULL;
+	FROM gd_esquema.Maestra
+		INNER JOIN D_DE_DATOS.PEDIDOS PE ON M.PEDIDO_NRO = PE.cod_pedido
+		INNER JOIN D_DE_DATOS.CUPONES_DESCUENTO C ON M.CUPON_NRO = C.cod_cupon_anterior
+	WHERE PEDIDO_NRO IS NOT NULL AND RECLAMO_NRO IS NULL AND CUPON_NRO IS NOT NULL
 END
 GO
 
@@ -379,7 +373,7 @@ AS
 BEGIN
 		INSERT INTO D_DE_DATOS.RECLAMOS(cod_reclamo,cod_usuario,cod_pedido,cod_tipo_reclamo,desc_reclamo,fecha_reclamo,cod_operador,cod_estado_reclamo,solucion_reclamo,fecha_solucion_reclamo,calificacion_solucion_reclamo)
 	SELECT DISTINCT
-	M.RECLAMO_NRO,
+		M.RECLAMO_NRO,
 		U.cod_usuario,
 		PE.cod_pedido,
 		T.cod_tipo_reclamo,
@@ -409,17 +403,12 @@ AS
 BEGIN
 	INSERT INTO D_DE_DATOS.RECLAMOS_CUPON(cod_reclamo,cod_cupon)
 	SELECT DISTINCT
-		PE.cod_pedido,
+		R.cod_reclamo,
 		C.cod_cupon
-	FROM
-	gd_esquema.Maestra M
-		INNER JOIN D_DE_DATOS.PEDIDOS PE ON M.PEDIDO_FECHA = PE.fecha_pedido AND M.PEDIDO_TOTAL_SERVICIO = PE.total_pedido
-		INNER JOIN D_DE_DATOS.USUARIOS U ON M.USUARIO_DNI = U.DNI_usuario
-		INNER JOIN D_DE_DATOS.LOCALES L ON M.LOCAL_NOMBRE = L.nombre_local
-
-		INNER JOIN D_DE_DATOS.CUPONES_DESCUENTO C ON M.CUPON_RECLAMO_MONTO  = C.monto_cupon AND M.CUPON_RECLAMO_FECHA_ALTA = C.fecha_alta_cupon AND M.CUPON_RECLAMO_FECHA_VENCIMIENTO = C.fecha_vencimiento_cupon
-		
-	WHERE PEDIDO_NRO IS NULL AND RECLAMO_NRO IS NOT NULL AND CUPON_RECLAMO_NRO IS NOT NULL;
+	FROM gd_esquema.Maestra
+		INNER JOIN D_DE_DATOS.RECLAMOS R ON M.RECLAMO_NRO = R.cod_reclamo
+		INNER JOIN D_DE_DATOS.CUPONES_DESCUENTO C ON M.CUPON_RECLAMO_NRO = C.cod_cupon_anterior
+	WHERE RECLAMO_NRO IS NOT NULL AND CUPON_RECLAMO_NRO IS NOT NULL;
 END
 GO
 
@@ -511,20 +500,6 @@ CREATE TABLE D_DE_DATOS.REPARTIDORES (
 	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades
 );
 
-CREATE TABLE D_DE_DATOS.ENVIOS (
-	cod_envio INT IDENTITY(1,1) PRIMARY KEY,
-	cod_direccion_usuario INT NOT NULL,
-	precio_envio DECIMAL(18,2) NOT NULL,
-	propina_envio DECIMAL(18,2) NULL,
-	cod_repartidor INT NOT NULL,
-	cod_localidad INT NOT NULL,
-	cod_pedido INT NOT NULL,
-	FOREIGN KEY (cod_direccion_usuario) REFERENCES D_DE_DATOS.direcciones_usuarios,
-	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.repartidores,
-	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades,
-	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.pedidos
-);
-
 CREATE TABLE D_DE_DATOS.TIPOS_MEDIOS_PAGO (
 	cod_tipo_medio_pago INT IDENTITY(1,1) PRIMARY KEY,
 	desc_tipo_medio_pago NVARCHAR(50) NOT NULL
@@ -585,7 +560,7 @@ CREATE TABLE D_DE_DATOS.ESTADOS_PEDIDOS (
 
 
 CREATE TABLE D_DE_DATOS.PEDIDOS (
-	cod_pedido INT PRIMARY KEY,
+	cod_pedido DECIMAL(18,0) PRIMARY KEY,
 	fecha_pedido DATETIME2(3) NOT NULL,
 	cod_usuario INT NOT NULL,
 	cod_local INT NOT NULL, 
@@ -605,20 +580,35 @@ CREATE TABLE D_DE_DATOS.PEDIDOS (
 	FOREIGN KEY (cod_estado_pedido) REFERENCES D_DE_DATOS.estados_pedidos
 );
 
+CREATE TABLE D_DE_DATOS.ENVIOS (
+	cod_envio INT IDENTITY(1,1) PRIMARY KEY,
+	cod_direccion_usuario INT NOT NULL,
+	precio_envio DECIMAL(18,2) NOT NULL,
+	propina_envio DECIMAL(18,2) NULL,
+	cod_repartidor INT NOT NULL,
+	cod_localidad INT NOT NULL,
+	cod_pedido INT NOT NULL,
+	FOREIGN KEY (cod_direccion_usuario) REFERENCES D_DE_DATOS.direcciones_usuarios,
+	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.repartidores,
+	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades,
+	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.pedidos
+);
 
-CREATE TABLE D_DE_DATOS.PRODUCTOS (
-    cod_producto INT IDENTITY(1,1) PRIMARY KEY,
-    cod_local INT NOT NULL,
+CREATE TABLE D_DE_DATOS.PRODUCTOS_LOCALES (
+	cod_productos_locales INT IDENTITY(1,1) PRIMARY KEY,
+    cod_producto NVARCHAR(50),
     nombre_producto NVARCHAR(50) NOT NULL,
     desc_producto NVARCHAR(255) NOT NULL,
     precio_unitario_producto DECIMAL(18,2) NOT NULL,
-    FOREIGN KEY (cod_local) REFERENCES D_DE_DATOS.locales
+	cod_local INT NOT NULL,
+	nombre_local NVARCHAR(255) NOT NULL,
+	FOREIGN KEY (cod_local) REFERENCES D_DE_DATOS.locales
 );
 
 CREATE TABLE D_DE_DATOS.ITEMS (
     cod_item INT IDENTITY(1,1) PRIMARY KEY,
-    cod_producto INT NOT NULL,
-    cod_pedido INT NOT NULL,
+    cod_productos_locales INT NOT NULL,
+    cod_pedido DECIMAL(18,0) NOT NULL,
     cantidad_item INT NOT NULL,
     precio_unitario_item DECIMAL(18,2) NOT NULL,
     FOREIGN KEY (cod_producto) REFERENCES D_DE_DATOS.productos,
@@ -648,9 +638,9 @@ CREATE TABLE D_DE_DATOS.ESTADOS_RECLAMOS (
 
 
 CREATE TABLE D_DE_DATOS.RECLAMOS (
-	cod_reclamo INT PRIMARY KEY,
+	cod_reclamo DECIMAL(18,0) PRIMARY KEY,
 	cod_usuario INT NOT NULL,
-	cod_pedido INT NOT NULL,
+	cod_pedido DECIMAL(18,0) NOT NULL,
 	cod_tipo_reclamo INT NOT NULL,
 	desc_reclamo NVARCHAR(255) NULL,
 	fecha_reclamo DATETIME2(3) NOT NULL,
@@ -673,6 +663,7 @@ CREATE TABLE D_DE_DATOS.TIPOS_CUPONES (
 
 CREATE TABLE D_DE_DATOS.CUPONES_DESCUENTO (
 	cod_cupon INT IDENTITY(1,1) PRIMARY KEY,
+	cod_cupon_anterior INT NULL,
 	cod_usuario INT NOT NULL,
 	monto_cupon DECIMAL (18,2) NOT NULL,
 	fecha_alta_cupon DATETIME2(3) NOT NULL,
@@ -683,7 +674,7 @@ CREATE TABLE D_DE_DATOS.CUPONES_DESCUENTO (
 );
 
 CREATE TABLE D_DE_DATOS.RECLAMOS_CUPON (
-	cod_reclamo INT NOT NULL,
+	cod_reclamo DECIMAL(18,0) NOT NULL,
 	cod_cupon INT NOT NULL,
 	FOREIGN KEY (cod_reclamo) REFERENCES D_DE_DATOS.reclamos,
 	FOREIGN KEY (cod_cupon) REFERENCES D_DE_DATOS.cupones_descuento,
@@ -691,7 +682,7 @@ CREATE TABLE D_DE_DATOS.RECLAMOS_CUPON (
 );
 
 CREATE TABLE D_DE_DATOS.PEDIDOS_CUPON (
-	cod_pedido INT NOT NULL,
+	cod_pedido DECIMAL(18,0) NOT NULL,
 	cod_cupon INT NOT NULL,
 	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.pedidos,
 	FOREIGN KEY (cod_cupon) REFERENCES D_DE_DATOS.cupones_descuento,
@@ -761,7 +752,7 @@ EXECUTE D_DE_DATOS.MigrarDireccionesUsuarios;
 EXECUTE D_DE_DATOS.MigrarMediosPago;
 EXECUTE D_DE_DATOS.MigrarLocales;
 EXECUTE D_DE_DATOS.MigrarHorariosLocales;
-EXECUTE D_DE_DATOS.MigrarProductos;
+EXECUTE D_DE_DATOS.MigrarProductosLocales;
 EXECUTE D_DE_DATOS.MigrarRepartidores;
 EXECUTE D_DE_DATOS.MigrarEnvios;
 EXECUTE D_DE_DATOS.MigrarPedidos;
