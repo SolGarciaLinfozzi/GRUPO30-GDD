@@ -361,7 +361,7 @@ BEGIN
 	SELECT DISTINCT
 		PE.cod_pedido,
 		C.cod_cupon
-	FROM gd_esquema.Maestra
+	FROM gd_esquema.Maestra M
 		INNER JOIN D_DE_DATOS.PEDIDOS PE ON M.PEDIDO_NRO = PE.cod_pedido
 		INNER JOIN D_DE_DATOS.CUPONES_DESCUENTO C ON M.CUPON_NRO = C.cod_cupon_anterior
 	WHERE PEDIDO_NRO IS NOT NULL AND RECLAMO_NRO IS NULL AND CUPON_NRO IS NOT NULL
@@ -405,7 +405,7 @@ BEGIN
 	SELECT DISTINCT
 		R.cod_reclamo,
 		C.cod_cupon
-	FROM gd_esquema.Maestra
+	FROM gd_esquema.Maestra M
 		INNER JOIN D_DE_DATOS.RECLAMOS R ON M.RECLAMO_NRO = R.cod_reclamo
 		INNER JOIN D_DE_DATOS.CUPONES_DESCUENTO C ON M.CUPON_RECLAMO_NRO = C.cod_cupon_anterior
 	WHERE RECLAMO_NRO IS NOT NULL AND CUPON_RECLAMO_NRO IS NOT NULL;
@@ -587,7 +587,7 @@ CREATE TABLE D_DE_DATOS.ENVIOS (
 	propina_envio DECIMAL(18,2) NULL,
 	cod_repartidor INT NOT NULL,
 	cod_localidad INT NOT NULL,
-	cod_pedido INT NOT NULL,
+	cod_pedido DECIMAL(18,0) NOT NULL,
 	FOREIGN KEY (cod_direccion_usuario) REFERENCES D_DE_DATOS.direcciones_usuarios,
 	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.repartidores,
 	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades,
@@ -611,7 +611,7 @@ CREATE TABLE D_DE_DATOS.ITEMS (
     cod_pedido DECIMAL(18,0) NOT NULL,
     cantidad_item INT NOT NULL,
     precio_unitario_item DECIMAL(18,2) NOT NULL,
-    FOREIGN KEY (cod_producto) REFERENCES D_DE_DATOS.productos,
+    FOREIGN KEY (cod_productos_locales) REFERENCES D_DE_DATOS.PRODUCTOS_LOCALES,
     FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.pedidos
 );
 
@@ -756,11 +756,11 @@ EXECUTE D_DE_DATOS.MigrarProductosLocales;
 EXECUTE D_DE_DATOS.MigrarRepartidores;
 EXECUTE D_DE_DATOS.MigrarEnvios;
 EXECUTE D_DE_DATOS.MigrarPedidos;
--- EXECUTE D_DE_DATOS.MigrarItems;
+EXECUTE D_DE_DATOS.MigrarItems;
 EXECUTE D_DE_DATOS.MigrarCuponesDescuento;
--- EXECUTE D_DE_DATOS.MigrarPedidosCupon;
+EXECUTE D_DE_DATOS.MigrarPedidosCupon;
 EXECUTE D_DE_DATOS.MigrarReclamos;
--- EXECUTE D_DE_DATOS.MigrarReclamosCupon;
+EXECUTE D_DE_DATOS.MigrarReclamosCupon;
 EXECUTE D_DE_DATOS.MigrarServiciosMensajeria;
 
 PRINT 'Migracion finalizada exitosamente'
