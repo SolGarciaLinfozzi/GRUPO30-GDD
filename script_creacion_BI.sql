@@ -280,6 +280,17 @@ GO
 -- pedidos cancelados tanto los que cancela el usuario como el local).
 -- ● Valor promedio mensual que tienen los envíos de pedidos en cada
 -- localidad.
+-- mes | localidad | promedioPrecioEnvios
+-- CREATE VIEW BI_D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD
+-- AS  
+--     SELECT T.tiempo_mes, L.nombre_localidad,
+--     (SUM(E.precio_envio) / (SELECT COUNT(*) FROM E)) promedioPrecioEnvios
+
+--     FROM D_DE_DATOS.BI_ENVIOS E
+--     JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+--     JOIN D_DE_DATOS.BI_PEDIDOS P ON E.cod_pedido = P.cod_pedido
+--     JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_entrega = T.tiempo_mes
+-- GO
 -- ● Desvío promedio en tiempo de entrega según el tipo de movilidad, el día
 -- de la semana y la franja horaria.
 -- El desvío debe calcularse en minutos y representa la diferencia entre la
@@ -290,6 +301,16 @@ GO
 -- ● Monto total de los cupones utilizados por mes en función del rango etario
 -- de los usuarios.
 -- ● Promedio de calificación mensual por local.
+-- mes | local | promedio calificacion
+-- CREATE VIEW BI_D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
+-- AS
+--     SELECT T.tiempo_mes, L.desc_local, 
+--     (SUM(P.calificacion_pedido) / (SELECT COUNT(*) FROM P)) promedioCalificaciones
+
+--     FROM D_DE_DATOS.BI_LOCALES L
+--     JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
+--     JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
+-- GO
 -- ● Porcentaje de pedidos y mensajería entregados mensualmente según el
 -- rango etario de los repartidores y la localidad.
 -- Este indicador se debe tener en cuenta y sumar tanto los envíos de pedidos
@@ -301,6 +322,17 @@ GO
 -- tipo de paquete.
 -- ● Cantidad de reclamos mensuales recibidos por cada local en función del
 -- día de la semana y rango horario.
+-- mes | local | diaSemana | rangoHorario | cantidadReclamos
+-- CREATE VIEW BI_D_DE_DATOS.CANTIDAD_RECLAMOS
+-- AS
+--     SELECT T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo,
+--     (SELECT COUNT(*) FROM R) cantidadReclamos
+
+--     FROM D_DE_DATOS.BI_LOCALES L
+--     JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
+--     JOIN D_DE_DATOS.BI_RECLAMOS R ON P.cod_pedido = R.cod_pedido
+--     JOIN D_DE_DATOS.BI_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes
+-- GO
 -- ● Tiempo promedio de resolución de reclamos mensual según cada tipo de
 -- reclamo y rango etario de los operadores.
 -- El tiempo de resolución debe calcularse en minutos y representa la
