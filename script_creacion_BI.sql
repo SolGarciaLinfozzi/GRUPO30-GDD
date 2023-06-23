@@ -274,23 +274,45 @@ GO
 
 -- ● Día de la semana y franja horaria con mayor cantidad de pedidos según la
 -- localidad y categoría del local, para cada mes de cada año.
--- 13
+--CREATE VIEW BI_D_DE_DATOS_MAYOR_CANTIDAD_PEDIDOS
+--AS
+--	SELECT T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local,
+--	(SELECT COUNT(*) FROM P) cantidadPedidos
+--	FROM D_DE_DATOS.BI_PEDIDOS P
+--	JOIN D_DE_DATOS.BI_LOCALES LO ON P.cod_local = LO.cod_local
+--	JOIN D_DE_DATOS.BI_ENVIOS E ON P.cod_pedido = E.cod_pedido
+--	JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+--	JOIN D_DE_DATOS.BI_CATEGORIAS_LOCALES CL ON LO.cod_categoria_local = CL.cod_categoria_local
+--	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
+--	GROUP BY T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local
+--GO
 -- ● Monto total no cobrado por cada local en función de los pedidos
 -- cancelados según el día de la semana y la franja horaria (cuentan como
 -- pedidos cancelados tanto los que cancela el usuario como el local).
+--CREATE VIEW BI_D_DE_DATOS_MONTO_NO_COBRADO
+--AS
+--	SELECT D.desc_dia, R.desc_rango_horario, L.nombre_local,
+--	(SELECT SUM(total_pedido) FROM P WHERE dia_entrega IS NULL) totalPedidosEnregados
+--	FROM D_DE_DATOS.BI_PEDIDOS P
+--	JOIN D_DE_DATOS.BI_DIAS D ON P.dia_pedido = D.desc_dia
+--	JOIN D_DE_DATOS.BI_LOCALES L ON P.cod_local = L.cod_local
+--	JOIN D_DE_DATOS.BI_RANGO_HORARIO R ON P.rango_horario_pedido = R.desc_rango_horario
+--	GROUP BY D.desc_dia, R.desc_rango_horario, L.nombre_local
+--GO
 -- ● Valor promedio mensual que tienen los envíos de pedidos en cada
 -- localidad.
 -- mes | localidad | promedioPrecioEnvios
--- CREATE VIEW BI_D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD
--- AS  
---     SELECT T.tiempo_mes, L.nombre_localidad,
---     (SUM(E.precio_envio) / (SELECT COUNT(*) FROM E)) promedioPrecioEnvios
+ --CREATE VIEW BI_D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD
+ --AS  
+ --    SELECT T.tiempo_mes, L.nombre_localidad,
+ --    (SUM(E.precio_envio) / (SELECT COUNT(*) FROM E)) promedioPrecioEnvios
 
---     FROM D_DE_DATOS.BI_ENVIOS E
---     JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
---     JOIN D_DE_DATOS.BI_PEDIDOS P ON E.cod_pedido = P.cod_pedido
---     JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_entrega = T.tiempo_mes
--- GO
+ --    FROM D_DE_DATOS.BI_ENVIOS E
+ --    JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+ --    JOIN D_DE_DATOS.BI_PEDIDOS P ON E.cod_pedido = P.cod_pedido
+ --    JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_entrega = T.tiempo_mes
+	-- GROUP BY T.tiempo_mes, L.nombre_localidad
+ --GO
 -- ● Desvío promedio en tiempo de entrega según el tipo de movilidad, el día
 -- de la semana y la franja horaria.
 -- El desvío debe calcularse en minutos y representa la diferencia entre la
@@ -299,46 +321,99 @@ GO
 -- Este indicador debe tener en cuenta todos los envíos, es decir, sumar tanto
 -- los envíos de pedidos como los de mensajería.
 -- ● Monto total de los cupones utilizados por mes en función del rango etario
--- de los usuarios.
+-- de los usuarios. /*NOS FALTAN CUPONES*/
+--CREATE VIEW BI_D_DE_DATOS_MONTO_TOTAL_CUPONES
+--AS
+--	SELECT T.tiempo_mes, RE.desc_rango_etario, SUM(C.monto_cupon) sumaMontoCupones
+--	FROM D_DE_DATOS.BI_USUARIOS U
+--	JOIN D_DE_DATOS.BI_CUPONES C ON U.cod_usuario = C.cod_usuario
+--	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON U.rango_etario = RE.cod_rango_etario
+--	JOIN D_DE_DATOS.BI_TIEMPO T ON C.mes_alta_cupon = T.tiempo_mes
+--	GROUP BY T.tiempo_mes, RE.desc_rango_etario
+--GO
 -- ● Promedio de calificación mensual por local.
 -- mes | local | promedio calificacion
--- CREATE VIEW BI_D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
--- AS
---     SELECT T.tiempo_mes, L.desc_local, 
---     (SUM(P.calificacion_pedido) / (SELECT COUNT(*) FROM P)) promedioCalificaciones
+ --CREATE VIEW BI_D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
+ --AS
+ --    SELECT T.tiempo_mes, L.desc_local, 
+ --    (SUM(P.calificacion_pedido) / (SELECT COUNT(*) FROM P)) promedioCalificaciones
 
---     FROM D_DE_DATOS.BI_LOCALES L
---     JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
---     JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
--- GO
+ --    FROM D_DE_DATOS.BI_LOCALES L
+ --    JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
+ --    JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
+--     GROUP BY T.tiempo_mes, L.desc_local
+ --GO
 -- ● Porcentaje de pedidos y mensajería entregados mensualmente según el
 -- rango etario de los repartidores y la localidad.
 -- Este indicador se debe tener en cuenta y sumar tanto los envíos de pedidos
 -- como los de mensajería.
 -- El porcentaje se calcula en función del total general de pedidos y envíos
--- mensuales entregados.
+-- mensuales entregados. /*HECHO SOLO PARA PEDIDOS*/
+--CREATE VIEW BI_D_DE_DATOS_PORCENTAJE_PEDIDOS_Y_ENVIOS_ENTREGADOS
+--AS
+--	SELECT T.tiempo_mes, L.desc_localidad, RE.desc_rango_etario,
+--	((SELECT COUNT(*) FROM P WHERE dia_entrega IS NOT NULL /*pedidos entregados*/) / (SELECT COUNT(*) FROM P /*pedidos totales*/) porcentaje
+--	FROM D_DE_DATOS.BI_PEDIDOS P
+--	JOIN D_DE_DATOS.BI_ENVIO E ON P.cod_pedido = E.cod_envio
+--	JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+--	JOIN D_DE_DATOS.BI_REPARTIDORES R ON E.cod_repartidor = R.cod_repartidor
+--	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON R.rango_etario = RE.cod_rango_etario
+--	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
+--	GROUP BY T.tiempo_mes, L.desc_localidad, RE.desc_rango_etario
+--GO
 -- ● Promedio mensual del valor asegurado (valor declarado por el usuario) de
 -- los paquetes enviados a través del servicio de mensajería en función del
--- tipo de paquete.
+-- tipo de paquete. /*NOS FALTA ENVIO MENSAJERIA, LO HAGO COMO SI LO TUVIERAMOS */
+--CREATE VIEW BI_D_DE_DATOS_PROMEDIO_VALOR_ASEGURADO
+--AS
+--	SELECT T.tiempo_mes, TP.cod_tipo_paquete /*como no tenemos desc_tipo_paquete no sabia si iba esto
+--	o el precio*/, 
+--	((SELECT SUM(valor_asegurado_mensajeria) FROM EM) / (SELECT COUNT(*) FROM EM)) promedio
+--	FROM D_DE_DATOS.BI_ENVIOS_MENSAJERIA EM
+--	JOIN D_DE_DATOS.BI_TIPOS_PAQUETES TP ON EM.cod_tipo_paquete = TP.cod_tipo_paquete
+--	JOIN D_DE_DATOS.BI_TIEMPO T ON EM.mes_envio_mensajeria = T.tiempo_mes
+--	GROUP BY T.tiempo_mes, TP.cod_tipo_paquete
+--GO
 -- ● Cantidad de reclamos mensuales recibidos por cada local en función del
 -- día de la semana y rango horario.
 -- mes | local | diaSemana | rangoHorario | cantidadReclamos
--- CREATE VIEW BI_D_DE_DATOS.CANTIDAD_RECLAMOS
--- AS
---     SELECT T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo,
---     (SELECT COUNT(*) FROM R) cantidadReclamos
+ --CREATE VIEW BI_D_DE_DATOS.CANTIDAD_RECLAMOS
+ --AS
+ --    SELECT T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo,
+ --    (SELECT COUNT(*) FROM R) cantidadReclamos
 
---     FROM D_DE_DATOS.BI_LOCALES L
---     JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
---     JOIN D_DE_DATOS.BI_RECLAMOS R ON P.cod_pedido = R.cod_pedido
---     JOIN D_DE_DATOS.BI_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes
--- GO
+ --    FROM D_DE_DATOS.BI_LOCALES L
+ --    JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
+ --    JOIN D_DE_DATOS.BI_RECLAMOS R ON P.cod_pedido = R.cod_pedido
+ --    JOIN D_DE_DATOS.BI_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes
+	-- GROUP BY T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo
+ --GO
 -- ● Tiempo promedio de resolución de reclamos mensual según cada tipo de
 -- reclamo y rango etario de los operadores.
 -- El tiempo de resolución debe calcularse en minutos y representa la
 -- diferencia entre la fecha/hora en que se realizó el reclamo y la fecha/hora
--- que se resolvió.
--- ● Monto mensual generado en cupones a partir de reclamos.
+-- que se resolvió. /*NOS FALTA TIPO RECLAMO. PARA RESOLVER COMO PIDE NECESITARIAMOS LA HORA EXACTA DE INICIO Y 
+RESOLUCION DEL RECLAMO. POR AHORA SOLO TENEMOS EL RANGO HORARIO */
+--CREATE VIEW BI_D_DE_DATOS_PROMEDIO_TIEMPO_SOLUCION_RECLAMOS
+--AS
+--	SELECT T.tiempo_mes, TR.desc_tipo_reclamo, RE.desc_rango_etario, 
+--	((SELECT SUM(hora_fin_reclamo - hora_inicio_reclamo) FROM R) / (SELECT COUNT(*) FROM R)) promedio
+--	FROM D_DE_DATOS.BI_ENVIOS_RECLAMOS R
+--	JOIN D_DE_DATOS.BI_ENVIOS_TIPOS_RECLAMOS TR ON R.cod_tipo_reclamo = TR.cod_tipo_reclamo
+--	JOIN D_DE_DATOS.BI_ENVIOS_OPERADORES O ON R.cod_operador = O.cod_operador
+--	JOIN D_DE_DATOS.BI_ENVIOS_RANGO_ETARIO RE ON O.rengo_etario = RE.cod_rango_etario
+--	JOIN D_DE_DATOS.BI_ENVIOS_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes
+--	GROUP BY T.tiempo_mes, TR.desc_tipo_reclamo, RE.desc_rango_etario
+--GO
+-- ● Monto mensual generado en cupones a partir de reclamos. /*NOS FALTAN CUPONES*/
+--CREATE VIEW BI_D_DE_DATOS_CUPONES_RECLAMOS
+--AS
+--	SELECT T.tiempo_mes, SUM(C.monto_cupon) sumaMontoCupones
+--	FROM D_DE_DATOS.BI_CUPONES C
+--	JOIN D_DE_DATOS.BI_TIPOS_CUPONES TC ON C.cod_tipo_cupon = TC.cod_tipo_cupon
+--	WHERE TC.desc_tipo_cupon = '/*acá va cupón de reclamo*/'
+--	GROUP BY T.tiempo_mes
+-- GO
 
 
 ---------------------------------------------------------------------------------------
