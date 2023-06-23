@@ -12,13 +12,13 @@ CREATE TABLE D_DE_DATOS.BI_TIEMPO(
 
 -- Día (Se corresponde con los días de la semana: L-M-M-J-V-S-D)
 CREATE TABLE D_DE_DATOS.BI_DIAS (
-    cod_dia INT IDENTITY(1,1) PRIMARY KEY,
+    cod_dia INT PRIMARY KEY,
 	desc_dia NVARCHAR(50) NOT NULL
 );
 
 -- Rango horario (De 8 a 00 cada 2 horas)
 CREATE TABLE D_DE_DATOS.BI_RANGO_HORARIO(
-    cod_rango_horario INT IDENTITY(1,1) PRIMARY KEY,
+    cod_rango_horario INT  PRIMARY KEY,
     desc_rango_horario NVARCHAR(50) NOT NULL
 );
 
@@ -31,7 +31,7 @@ CREATE TABLE D_DE_DATOS.BI_LOCALIDADES (
 
 -- Rango etario usuario/repartidor/operario
 CREATE TABLE D_DE_DATOS.BI_RANGO_ETARIO(
-    cod_rango_etario INT IDENTITY(1,1) PRIMARY KEY,
+    cod_rango_etario INT PRIMARY KEY,
     desc_rango_etario NVARCHAR(50) NOT NULL
 );
 
@@ -187,6 +187,70 @@ CREATE TABLE D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (
 	FOREIGN KEY (cod_estado_mensajeria) REFERENCES D_DE_DATOS.estados_mensajeria
 );
 
+--------------------------------------------------------------------------------------
+
+---------------- TABLAS DE HECHOS ----------------
+
+-- Hechos pedidos
+CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
+	cod_pedido DECIMAL(18,0) PRIMARY KEY,
+	dia_pedido NVARCHAR(30) NOT NULL,
+	cod_tiempo INT NOT NULL,
+	rango_horario_pedido INT NOT NULL,
+	dia_entrega INT NOT NULL,
+	mes_entrega INT NOT NULL, 
+	anio_entrega INT NOT NULL,
+	rango_horario_entrega INT NOT NULL, 
+	cod_local INT NOT NULL, 
+	tarifa_servicio_pedido DECIMAL(18,2) NOT NULL,
+	total_productos_pedido DECIMAL(18,2) NOT NULL,
+	total_pedido DECIMAL(18,2) NOT NULL,
+	total_descuentos DECIMAL(18,2) NOT NULL,
+	calificacion_pedido DECIMAL(18,0) NULL,
+	FOREIGN KEY (cod_local) REFERENCES D_DE_DATOS.BI_LOCALES,
+	FOREIGN KEY (cod_tiempo) REFERENCES D_DE_DATOS.BI_TIEMPO
+);
+
+-- Hechos envios
+CREATE TABLE D_DE_DATOS.BI_ENVIOS (
+	cod_envio INT IDENTITY(1,1) PRIMARY KEY,
+	cod_direccion_usuario INT NOT NULL,
+	precio_envio DECIMAL(18,2) NOT NULL,
+	cod_repartidor INT NOT NULL,
+	cod_localidad INT NOT NULL,
+	cod_pedido DECIMAL(18,0) NOT NULL,
+	FOREIGN KEY (cod_direccion_usuario) REFERENCES D_DE_DATOS.BI_DIRECCIONES_USUARIOS,
+	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.BI_REPARTIDORES,
+	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.BI_LOCALIDADES,
+	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS
+);
+
+-- Hechos reclamos - a revisar
+CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
+	cod_reclamo DECIMAL(18,0) PRIMARY KEY,
+	cod_usuario INT NOT NULL,
+	cod_pedido DECIMAL(18,0) NOT NULL,
+	cod_tipo_reclamo INT NOT NULL,
+	desc_reclamo NVARCHAR(255) NULL,
+	dia_inicio_reclamo NVARCHAR(30),
+	mes_inicio_reclamo INT NOT NULL,
+	anio_inicio_reclamo INT NOT NULL,
+	rango_horario_inicio_reclamo INT NOT NULL,
+	dia_solucion NVARCHAR(30),
+	mes_solucion INT NOT NULL,
+	anio_solucion INT NOT NULL, 
+	rango_horario_solucion INT NOT NULL,
+	cod_operador INT NOT NULL,
+	cod_estado_reclamo INT NOT NULL,
+	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.BI_USUARIOS,
+	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS,
+	FOREIGN KEY (cod_tipo_reclamo) REFERENCES D_DE_DATOS.BI_TIPOS_RECLAMOS,
+	FOREIGN KEY (cod_operador) REFERENCES D_DE_DATOS.BI_OPERADORES,
+	FOREIGN KEY (cod_estado_reclamo) REFERENCES D_DE_DATOS.BI_ESTADOS_RECLAMOS
+);
+
+-------------------------------------------------------------------------------------------
+
 ---------------- FUNCIONES ----------------
 
 --Rango Etario
@@ -274,14 +338,14 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_RANGO_ETARIO
 AS
 BEGIN 
-INSERT INTO D_DE_DATOS.BI_RANGO_ETARIO(desc_rango_etario)
-	VALUES('<25')
-INSERT INTO D_DE_DATOS.BI_RANGO_ETARIO(desc_rango_etario)
-	VALUES('25-35')
-INSERT INTO D_DE_DATOS.BI_RANGO_ETARIO(desc_rango_etario)
-	VALUES('35-55')
-INSERT INTO D_DE_DATOS.BI_RANGO_ETARIO(desc_rango_etario)
-	VALUES('>55')
+INSERT INTO D_DE_DATOS.BI_RANGO_ETARIO(cod_rango_etario,desc_rango_etario)
+	VALUES(1,'<25')
+INSERT INTO D_DE_DATOS.BI_RANGO_ETARIO(cod_rango_etario,desc_rango_etario)
+	VALUES(2,'25-35')
+INSERT INTO D_DE_DATOS.BI_RANGO_ETARIO(cod_rango_etario,desc_rango_etario)
+	VALUES(3,'35-55')
+INSERT INTO D_DE_DATOS.BI_RANGO_ETARIO(cod_rango_etario,desc_rango_etario)
+	VALUES(4,'>55')
 END
 GO
 
@@ -289,22 +353,43 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_RANGO_HORARIO
 AS
 BEGIN 
-INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(desc_rango_horario)
-	VALUES('08:00 - 10:00')
-INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(desc_rango_horario)
-	VALUES('10:00 - 12:00')
-INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(desc_rango_horario)
-	VALUES('12:00 - 14:00')
-INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(desc_rango_horario)
-	VALUES('14:00 - 16:00')
-INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(desc_rango_horario)
-	VALUES('16:00 - 18:00')
-INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(desc_rango_horario)
-	VALUES('18:00 - 20:00')
-INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(desc_rango_horario)
-	VALUES('20:00 - 22:00')
-INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(desc_rango_horario)
-	VALUES('22:00 - 00:00')
+INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(cod_rango_horario,desc_rango_horario)
+	VALUES(1,'08:00 - 10:00')
+INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(cod_rango_horario,desc_rango_horario)
+	VALUES(2,'10:00 - 12:00')
+INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(cod_rango_horario,desc_rango_horario)
+	VALUES(3,'12:00 - 14:00')
+INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(cod_rango_horario,desc_rango_horario)
+	VALUES(4,'14:00 - 16:00')
+INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(cod_rango_horario,desc_rango_horario)
+	VALUES(5,'16:00 - 18:00')
+INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(cod_rango_horario,desc_rango_horario)
+	VALUES(6,'18:00 - 20:00')
+INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(cod_rango_horario,desc_rango_horario)
+	VALUES(7,'20:00 - 22:00')
+INSERT INTO D_DE_DATOS.BI_RANGO_HORARIO(cod_rango_horario,desc_rango_horario)
+	VALUES(8,'22:00 - 00:00')
+END
+GO
+
+--Dias
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_DIAS
+AS
+BEGIN 
+INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
+	VALUES(1,'Domingo')
+INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
+	VALUES(2,'Lunes')
+INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
+	VALUES(3,'Martes')
+INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
+	VALUES(4,'Miercoles')
+INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
+	VALUES(5,'Jueves')
+INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
+	VALUES(6,'Viernes')
+INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
+	VALUES(7,'Sabado')
 END
 GO
 
@@ -387,22 +472,6 @@ GO
 
 ---------------- MIGRACIONES A HECHOS ----------------
 
--- Hechos pedidos
-/*cod_pedido DECIMAL(18,0) PRIMARY KEY,
-	dia_pedido NVARCHAR(30) NOT NULL,
-	mes_pedido INT NOT NULL,
-	anio_pedido INT NOT NULL,
-	rango_horario_pedido INT NOT NULL,
-	dia_entrega INT NOT NULL,
-	mes_entrega INT NOT NULL, 
-	anio_entrega INT NOT NULL
-	rango_horario_entrega INT NOT NULL, 
-	cod_local INT NOT NULL, 
-	tarifa_servicio_pedido DECIMAL(18,2) NOT NULL,
-	total_productos_pedido DECIMAL(18,2) NOT NULL,
-	total_pedido DECIMAL(18,2) NOT NULL,
-	total_descuentos DECIMAL(18,2) NOT NULL,
-	calificacion_pedido DECIMAL(18,0) NULL,*/
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
  AS
   BEGIN
@@ -460,67 +529,7 @@ GO
 
 -- Faltan migraciones a pedidos, envios y entiendo que a servicios_mensajeria
 
----------------- TABLAS DE HECHOS ----------------
 
--- Hechos pedidos
-CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
-	cod_pedido DECIMAL(18,0) PRIMARY KEY,
-	dia_pedido NVARCHAR(30) NOT NULL,
-	cod_tiempo INT NOT NULL,
-	rango_horario_pedido INT NOT NULL,
-	dia_entrega INT NOT NULL,
-	mes_entrega INT NOT NULL, 
-	anio_entrega INT NOT NULL,
-	rango_horario_entrega INT NOT NULL, 
-	cod_local INT NOT NULL, 
-	tarifa_servicio_pedido DECIMAL(18,2) NOT NULL,
-	total_productos_pedido DECIMAL(18,2) NOT NULL,
-	total_pedido DECIMAL(18,2) NOT NULL,
-	total_descuentos DECIMAL(18,2) NOT NULL,
-	calificacion_pedido DECIMAL(18,0) NULL,
-	FOREIGN KEY (cod_local) REFERENCES D_DE_DATOS.BI_LOCALES,
-	FOREIGN KEY (cod_tiempo) REFERENCES D_DE_DATOS.BI_TIEMPO
-);
-
--- Hechos envios
-CREATE TABLE D_DE_DATOS.BI_ENVIOS (
-	cod_envio INT IDENTITY(1,1) PRIMARY KEY,
-	cod_direccion_usuario INT NOT NULL,
-	precio_envio DECIMAL(18,2) NOT NULL,
-	cod_repartidor INT NOT NULL,
-	cod_localidad INT NOT NULL,
-	cod_pedido DECIMAL(18,0) NOT NULL,
-	FOREIGN KEY (cod_direccion_usuario) REFERENCES D_DE_DATOS.BI_DIRECCIONES_USUARIOS,
-	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.BI_REPARTIDORES,
-	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.BI_LOCALIDADES,
-	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS
-);
-
--- Hechos reclamos - a revisar
-CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
-	cod_reclamo DECIMAL(18,0) PRIMARY KEY,
-	cod_usuario INT NOT NULL,
-	cod_pedido DECIMAL(18,0) NOT NULL,
-	cod_tipo_reclamo INT NOT NULL,
-	desc_reclamo NVARCHAR(255) NULL,
-	dia_inicio_reclamo NVARCHAR(30),
-	mes_inicio_reclamo INT NOT NULL,
-	anio_inicio_reclamo INT NOT NULL,
-	rango_horario_inicio_reclamo INT NOT NULL,
-	dia_solucion NVARCHAR(30),
-	mes_solucion INT NOT NULL,
-	anio_solucion INT NOT NULL, 
-	rango_horario_solucion INT NOT NULL,
-	cod_operador INT NOT NULL,
-	cod_estado_reclamo INT NOT NULL,
-	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.BI_USUARIOS,
-	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS,
-	FOREIGN KEY (cod_tipo_reclamo) REFERENCES D_DE_DATOS.BI_TIPOS_RECLAMOS,
-	FOREIGN KEY (cod_operador) REFERENCES D_DE_DATOS.BI_OPERADORES,
-	FOREIGN KEY (cod_estado_reclamo) REFERENCES D_DE_DATOS.BI_ESTADOS_RECLAMOS
-);
-
--------------------------------------------------------------------------------------------
 
 
 ---------------------------------------------------------------------------------
