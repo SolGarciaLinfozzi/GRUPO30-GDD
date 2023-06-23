@@ -194,12 +194,11 @@ CREATE TABLE D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (
 -- Hechos pedidos
 CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
 	cod_pedido DECIMAL(18,0) PRIMARY KEY,
-	dia_pedido NVARCHAR(30) NOT NULL,
-	cod_tiempo INT NOT NULL,
+	cod_dia_pedido INT NOT NULL,
+	cod_tiempo_pedido INT NOT NULL,
 	rango_horario_pedido INT NOT NULL,
-	dia_entrega INT NOT NULL,
-	mes_entrega INT NOT NULL, 
-	anio_entrega INT NOT NULL,
+	cod_dia_entrega INT NOT NULL,
+	cod_tiempo_entrega INT NOT NULL,
 	rango_horario_entrega INT NOT NULL, 
 	cod_local INT NOT NULL, 
 	tarifa_servicio_pedido DECIMAL(18,2) NOT NULL,
@@ -208,7 +207,10 @@ CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
 	total_descuentos DECIMAL(18,2) NOT NULL,
 	calificacion_pedido DECIMAL(18,0) NULL,
 	FOREIGN KEY (cod_local) REFERENCES D_DE_DATOS.BI_LOCALES,
-	FOREIGN KEY (cod_tiempo) REFERENCES D_DE_DATOS.BI_TIEMPO
+	FOREIGN KEY (cod_tiempo_pedido) REFERENCES D_DE_DATOS.BI_TIEMPO,
+	FOREIGN KEY (cod_tiempo_entrega) REFERENCES D_DE_DATOS.BI_TIEMPO,
+	FOREIGN KEY (cod_dia_pedido) REFERENCES D_DE_DATOS.BI_DIAS,
+	FOREIGN KEY (cod_dia_entrega) REFERENCES D_DE_DATOS.BI_DIAS
 );
 
 -- Hechos envios
@@ -383,13 +385,13 @@ INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
 INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
 	VALUES(3,'Martes')
 INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
-	VALUES(4,'Miercoles')
+	VALUES(4,'Miércoles')
 INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
 	VALUES(5,'Jueves')
 INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
 	VALUES(6,'Viernes')
 INSERT INTO D_DE_DATOS.BI_DIAS(cod_dia,desc_dia)
-	VALUES(7,'Sabado')
+	VALUES(7,'Sábado')
 END
 GO
 
@@ -477,12 +479,11 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
   BEGIN
     INSERT INTO D_DE_DATOS.BI_PEDIDOS 
 	(cod_pedido,
-	dia_pedido,
-	cod_tiempo,
+	cod_dia_pedido,
+	cod_tiempo_pedido,
 	rango_horario_pedido,
-	dia_entrega,
-	mes_entrega,
-	anio_entrega,
+	cod_dia_entrega,
+	cod_tiempo_entrega,
 	rango_horario_entrega,
 	cod_local,
 	tarifa_servicio_pedido,
@@ -491,13 +492,13 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
 	total_descuentos,
 	calificacion_pedido
 	)
-		SELECT cod_pedido,
-		  D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_pedido) AS dia_pedido,
+		SELECT 
+		  cod_pedido,
+		  D.cod_dia,
 		  T.cod_tiempo,
 		  D_DE_DATOS.CALCULAR_RANGO_HORARIO(fecha_pedido) AS rango_horario_pedido,
-		  D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_entrega_pedido) AS dia_entrega,
-		  YEAR(fecha_entrega_pedido) AS anio_entrega,
-    	  MONTH(fecha_entrega_pedido) AS mes_entrega,
+		  D.cod_dia,
+		  T.cod_tiempo,
 		  D_DE_DATOS.CALCULAR_RANGO_HORARIO(fecha_entrega_pedido) AS rango_horario_entrega,
 		  cod_local,
 		  tarifa_servicio_pedido,
@@ -506,7 +507,8 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
 		  total_descuentos,
 		  calificacion_pedido
 		  FROM D_DE_DATOS.PEDIDOS P
-		  INNER JOIN D_DE_DATOS.BI_TIEMPO T ON (T.tiempo_anio = YEAR(P.fecha_pedido) AND T.tiempo_mes = MONTH(P.fecha_pedido))
+		  INNER JOIN D_DE_DATOS.BI_TIEMPO T ON T.tiempo_anio = YEAR(P.fecha_pedido) AND T.tiempo_mes = MONTH(P.fecha_pedido)
+		  INNER JOIN D_DE_DATOS.BI_DIAS D ON D.desc_dia = D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_entrega_pedido)
 		  END
 GO
 
