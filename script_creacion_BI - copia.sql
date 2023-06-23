@@ -128,7 +128,8 @@ CREATE TABLE D_DE_DATOS.BI_OPERADORES (
 );
 
 
------------------ OTRAS TABLAS EXTRAS ¿¿¿¿¿¿
+
+------- OTRAS TABLAS EXTRAS ¿¿¿¿¿¿
 
 -- Cupones
 CREATE TABLE D_DE_DATOS.BI_TIPOS_CUPON (
@@ -410,7 +411,7 @@ END
 GO
 
 
--- Provincia/Localidad
+-- Localidades
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_LOCALIDADES
  AS
   BEGIN
@@ -427,22 +428,8 @@ CREATE TABLE D_DE_DATOS.BI_TIPOS_MEDIOS_PAGO (
 );
 
 
--- Tipo de Local/Categoría de Local
 
--- Tipo de Local FALTA MIGRAR
-CREATE TABLE D_DE_DATOS.BI_TIPOS_LOCALES (
-    cod_tipo_local INT PRIMARY KEY,
-	desc_tipo_local NVARCHAR(50) NOT NULL
-);
-
--- Categoria de Local FALTA MIGRAR
-CREATE TABLE D_DE_DATOS.BI_CATEGORIAS_LOCALES (
-    cod_categoria_local INT PRIMARY KEY,
-	desc_categoria_local NVARCHAR(50) NOT NULL
-);
-
-
--- Local
+-- Locales
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_LOCALES
  AS
   BEGIN
@@ -451,12 +438,6 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_LOCALES
 		FROM D_DE_DATOS.LOCALES L
   END
 GO
-
--- Tipo Movilidad FALTA MIGRAR
-CREATE TABLE D_DE_DATOS.BI_TIPOS_MOVILIDAD (
-	cod_movilidad_repartidor INT PRIMARY KEY,
-	desc_movilidad_repartidor NVARCHAR(50) NOT NULL
-);
 
 -- Tipo paquete
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_PAQUETES
@@ -467,39 +448,10 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_PAQUETES
   END
 GO
 
----FALTA MIGRAR:
-
--- Estados pedidos
-CREATE TABLE D_DE_DATOS.BI_ESTADOS_PEDIDOS (
-    cod_estado_pedido INT  PRIMARY KEY,
-	desc_estado_pedido NVARCHAR(50) NOT NULL
-);
-
--- Estado envíos mensajería
-CREATE TABLE D_DE_DATOS.BI_ESTADOS_MENSAJERIA (
-	cod_estado_mensajeria INT  PRIMARY KEY,
-	desc_estado_mensajeria NVARCHAR(50) NOT NULL
-);
-
--- Estados reclamos
-CREATE TABLE D_DE_DATOS.BI_ESTADOS_RECLAMOS (
-	cod_estado_reclamo INT  PRIMARY KEY,
-	desc_estado_reclamo NVARCHAR(50) NOT NULL
-);
 
 ---------------------------------------------------------------------------------------
 
 ---------------- MIGRACIONES A TABLAS EXTRAS ----------------
-
--- Usuarios
-CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_USUARIOS
- AS
-  BEGIN
-    INSERT INTO D_DE_DATOS.BI_USUARIOS (cod_usuario, rango_etario, fecha_nacimiento_usuario)
-		SELECT U.cod_usuario, D_DE_DATOS.CALCULAR_RANGO_ETARIO(U.fecha_nacimiento_usuario), U.fecha_nacimiento_usuario
-		FROM D_DE_DATOS.USUARIOS U
-  END
-GO
 
 -- Repartidores
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_REPARTIDORES
@@ -508,6 +460,16 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_REPARTIDORES
     INSERT INTO D_DE_DATOS.BI_REPARTIDORES (cod_repartidor, rango_etario, cod_movilidad_repartidor)
 		SELECT R.cod_repartidor,D_DE_DATOS.CALCULAR_RANGO_ETARIO(R.fecha_nacimiento_repartidor), R.cod_movilidad_repartidor
 		FROM D_DE_DATOS.REPARTIDORES R
+  END
+GO
+
+-- Usuarios
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_USUARIOS
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_USUARIOS (cod_usuario, rango_etario, fecha_nacimiento_usuario)
+		SELECT U.cod_usuario, D_DE_DATOS.CALCULAR_RANGO_ETARIO(U.fecha_nacimiento_usuario), U.fecha_nacimiento_usuario
+		FROM D_DE_DATOS.USUARIOS U
   END
 GO
 
@@ -520,8 +482,6 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_OPERADORES
 		FROM D_DE_DATOS.OPERADORES O
   END
 GO
-
---FALTA MIGRAR OTRAS TABLAS EXTRAS
 
 
 ---------------------------------------------------------------------------------------
@@ -583,31 +543,9 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_ENVIOS
 	END
 GO
 
+-- Faltan migraciones a pedidos, envios y entiendo que a servicios_mensajeria
 
---FALTA MIGRAR
--- Hechos reclamos - a revisar
-CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
-	cod_reclamo DECIMAL(18,0) PRIMARY KEY,
-	cod_usuario INT NOT NULL,
-	cod_pedido DECIMAL(18,0) NOT NULL,
-	cod_tipo_reclamo INT NOT NULL,
-	desc_reclamo NVARCHAR(255) NULL,
-	dia_inicio_reclamo NVARCHAR(30),
-	mes_inicio_reclamo INT NOT NULL,
-	anio_inicio_reclamo INT NOT NULL,
-	rango_horario_inicio_reclamo INT NOT NULL,
-	dia_solucion NVARCHAR(30),
-	mes_solucion INT NOT NULL,
-	anio_solucion INT NOT NULL, 
-	rango_horario_solucion INT NOT NULL,
-	cod_operador INT NOT NULL,
-	cod_estado_reclamo INT NOT NULL,
-	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.BI_USUARIOS,
-	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS,
-	FOREIGN KEY (cod_tipo_reclamo) REFERENCES D_DE_DATOS.BI_TIPOS_RECLAMOS,
-	FOREIGN KEY (cod_operador) REFERENCES D_DE_DATOS.BI_OPERADORES,
-	FOREIGN KEY (cod_estado_reclamo) REFERENCES D_DE_DATOS.BI_ESTADOS_RECLAMOS
-);
+
 
 
 ---------------------------------------------------------------------------------
