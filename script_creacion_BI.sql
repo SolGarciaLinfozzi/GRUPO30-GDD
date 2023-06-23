@@ -24,7 +24,7 @@ CREATE TABLE D_DE_DATOS.BI_RANGO_HORARIO(
 
 -- Provincia/Localidad
 CREATE TABLE D_DE_DATOS.BI_LOCALIDADES (
-	cod_localidad INT IDENTITY(1,1) PRIMARY KEY,
+	cod_localidad INT PRIMARY KEY,
 	nombre_localidad NVARCHAR(255) NOT NULL,
 	provincia_localidad NVARCHAR(255) NOT NULL
 );
@@ -37,13 +37,27 @@ CREATE TABLE D_DE_DATOS.BI_RANGO_ETARIO(
 
 -- Tipo Medio de pagoX
 CREATE TABLE D_DE_DATOS.BI_TIPOS_MEDIOS_PAGO (
-	cod_tipo_medio_pago INT IDENTITY(1,1) PRIMARY KEY,
+	cod_tipo_medio_pago INT PRIMARY KEY,
 	desc_tipo_medio_pago NVARCHAR(50) NOT NULL
+);
+
+-- Tipo de Local/Categoría de Local
+
+-- Tipo de Local
+CREATE TABLE D_DE_DATOS.BI_TIPOS_LOCALES (
+    cod_tipo_local INT PRIMARY KEY,
+	desc_tipo_local NVARCHAR(50) NOT NULL
+);
+
+-- Categoria de Local
+CREATE TABLE D_DE_DATOS.BI_CATEGORIAS_LOCALES (
+    cod_categoria_local INT PRIMARY KEY,
+	desc_categoria_local NVARCHAR(50) NOT NULL
 );
 
 -- Local
 CREATE TABLE D_DE_DATOS.BI_LOCALES (
-    cod_local INT IDENTITY(1,1) PRIMARY KEY,
+    cod_local INT PRIMARY KEY,
     nombre_local NVARCHAR(100) NOT NULL,
     desc_local NVARCHAR(255) NOT NULL,
     direccion_local NVARCHAR(255) NOT NULL,
@@ -56,47 +70,33 @@ CREATE TABLE D_DE_DATOS.BI_LOCALES (
 );
 
 
--- Tipo de Local/Categoría de Local
-
--- Tipo de Local
-CREATE TABLE D_DE_DATOS.BI_TIPOS_LOCALES (
-    cod_tipo_local INT IDENTITY(1,1) PRIMARY KEY,
-	desc_tipo_local NVARCHAR(50) NOT NULL
-);
-
--- Categoria de Local
-CREATE TABLE D_DE_DATOS.BI_CATEGORIAS_LOCALES (
-    cod_categoria_local INT IDENTITY(1,1) PRIMARY KEY,
-	desc_categoria_local NVARCHAR(50) NOT NULL
-);
-
 -- Tipo Movilidad
 CREATE TABLE D_DE_DATOS.BI_TIPOS_MOVILIDAD (
-	cod_movilidad_repartidor INT IDENTITY(1,1) PRIMARY KEY,
+	cod_movilidad_repartidor INT PRIMARY KEY,
 	desc_movilidad_repartidor NVARCHAR(50) NOT NULL
 );
 
 -- Tipo Paquete
 CREATE TABLE D_DE_DATOS.BI_TIPOS_PAQUETES (
-	cod_tipo_paquete INT IDENTITY(1,1) PRIMARY KEY,
+	cod_tipo_paquete INT  PRIMARY KEY,
 	precio_paquete DECIMAL(18,2) NOT NULL,
 );
 
 -- Estados pedidos
 CREATE TABLE D_DE_DATOS.BI_ESTADOS_PEDIDOS (
-    cod_estado_pedido INT IDENTITY(1,1) PRIMARY KEY,
+    cod_estado_pedido INT  PRIMARY KEY,
 	desc_estado_pedido NVARCHAR(50) NOT NULL
 );
 
 -- Estado envíos mensajería
 CREATE TABLE D_DE_DATOS.BI_ESTADOS_MENSAJERIA (
-	cod_estado_mensajeria INT IDENTITY(1,1) PRIMARY KEY,
+	cod_estado_mensajeria INT  PRIMARY KEY,
 	desc_estado_mensajeria NVARCHAR(50) NOT NULL
 );
 
 -- Estados reclamos
 CREATE TABLE D_DE_DATOS.BI_ESTADOS_RECLAMOS (
-	cod_estado_reclamo INT IDENTITY(1,1) PRIMARY KEY,
+	cod_estado_reclamo INT  PRIMARY KEY,
 	desc_estado_reclamo NVARCHAR(50) NOT NULL
 );
 
@@ -107,88 +107,85 @@ CREATE TABLE D_DE_DATOS.BI_ESTADOS_RECLAMOS (
 
 -- Usuarios
 CREATE TABLE D_DE_DATOS.BI_USUARIOS (
-	cod_usuario INT IDENTITY(1,1),
+	cod_usuario INT PRIMARY KEY,
 	rango_etario INT,
 	fecha_nacimiento_usuario DATE NOT NULL,
 );
 
 -- Repartidores
 CREATE TABLE D_DE_DATOS.BI_REPARTIDORES (
-	cod_repartidor INT IDENTITY(1,1) PRIMARY KEY,
+	cod_repartidor INT PRIMARY KEY,
 	rango_etario INT,
 	cod_movilidad_repartidor INT NOT NULL,
 );
 
-
 -- Operadores 
 CREATE TABLE D_DE_DATOS.BI_OPERADORES (
-	cod_operador INT IDENTITY(1,1) PRIMARY KEY,
+	cod_operador INT PRIMARY KEY,
 	rango_etario INT,
 	fecha_nacimiento_operador DATE NOT NULL,
 );
 
----------------- TABLAS DE HECHOS ----------------
-
--- Hechos pedidos
-CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
-	cod_pedido DECIMAL(18,0) PRIMARY KEY,
-	dia_pedido NVARCHAR(30) NOT NULL,
-	mes_pedido INT NOT NULL,
-	anio_pedido INT NOT NULL,
-	rango_horario_pedido INT NOT NULL,
-	dia_entrega INT NOT NULL,
-	mes_entrega INT NOT NULL, 
-	anio_entrega INT NOT NULL
-	rango_horario_entrega INT NOT NULL, 
-	cod_local INT NOT NULL, 
-	tarifa_servicio_pedido DECIMAL(18,2) NOT NULL,
-	total_productos_pedido DECIMAL(18,2) NOT NULL,
-	total_pedido DECIMAL(18,2) NOT NULL,
-	total_descuentos DECIMAL(18,2) NOT NULL,
-	total_servicios DECIMAL(18,2) NOT NULL,
-	calificacion_pedido DECIMAL(18,0) NULL,
-	FOREIGN KEY (cod_local) REFERENCES D_DE_DATOS.BI_LOCALES,
+-- Cupones
+CREATE TABLE D_DE_DATOS.BI_TIPOS_CUPON (
+	cod_tipo_cupon INT  PRIMARY KEY,
+	desc_tipo_cupon NVARCHAR(255) NOT NULL
 );
 
--- Hechos envios
-CREATE TABLE D_DE_DATOS.BI_ENVIOS (
-	cod_envio INT IDENTITY(1,1) PRIMARY KEY,
-	cod_direccion_usuario INT NOT NULL,
-	precio_envio DECIMAL(18,2) NOT NULL,
-	cod_repartidor INT NOT NULL,
-	cod_localidad INT NOT NULL,
-	cod_pedido DECIMAL(18,0) NOT NULL,
-	FOREIGN KEY (cod_direccion_usuario) REFERENCES D_DE_DATOS.BI_DIRECCIONES_USUARIOS,
-	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.BI_REPARTIDORES,
-	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.BI_LOCALIDADES,
-	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS
-);
-
--- Hechos reclamos - a revisar
-CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
-	cod_reclamo DECIMAL(18,0) PRIMARY KEY,
+CREATE TABLE D_DE_DATOS.BI_CUPONES_DESCUENTO (
+	cod_cupon INT  PRIMARY KEY,
+	cod_cupon_anterior INT NULL,
 	cod_usuario INT NOT NULL,
-	cod_pedido DECIMAL(18,0) NOT NULL,
-	cod_tipo_reclamo INT NOT NULL,
-	desc_reclamo NVARCHAR(255) NULL,
-	dia_inicio_reclamo NVARCHAR(30),
-	mes_inicio_reclamo INT NOT NULL,
-	anio_inicio_reclamo INT NOT NULL,
-	rango_horario_inicio_reclamo INT NOT NULL,
-	dia_solucion NVARCHAR(30),
-	mes_solucion INT NOT NULL,
-	anio_solucion INT NOT NULL, 
-	rango_horario_solucion INT NOT NULL,
-	cod_operador INT NOT NULL,
-	cod_estado_reclamo INT NOT NULL,
-	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.BI_USUARIOS,
-	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS,
-	FOREIGN KEY (cod_tipo_reclamo) REFERENCES D_DE_DATOS.BI_TIPOS_RECLAMOS,
-	FOREIGN KEY (cod_operador) REFERENCES D_DE_DATOS.BI_OPERADORES,
-	FOREIGN KEY (cod_estado_reclamo) REFERENCES D_DE_DATOS.BI_ESTADOS_RECLAMOS
+	monto_cupon DECIMAL (18,2) NOT NULL,
+	fecha_alta_cupon DATETIME2(3) NOT NULL,
+	fecha_vencimiento_cupon DATETIME2(3) NOT NULL,
+	cod_tipo_cupon INT NOT NULL,
+	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
+	FOREIGN KEY (cod_tipo_cupon) REFERENCES D_DE_DATOS.tipos_cupones
 );
 
--------------------------------------------------------------------------------------------
+--Envios_mensajería
+
+CREATE TABLE D_DE_DATOS.BI_MEDIOS_PAGO (
+	cod_medio_pago INT PRIMARY KEY,
+	cod_usuario INT NOT NULL,
+	cod_tipo_medio_pago INT NOT NULL,
+	marca_tarjeta NVARCHAR(100) NULL,
+	tarjeta_nro NVARCHAR(50) NULL,
+	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
+	FOREIGN KEY (cod_tipo_medio_pago) REFERENCES D_DE_DATOS.tipos_medios_pago
+);
+
+
+
+CREATE TABLE D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (
+	cod_mensajeria INT PRIMARY KEY,
+	cod_usuario INT NOT NULL,
+	fecha_mensajeria DATETIME2(3) NOT NULL,
+	direccion_origen_mensajeria NVARCHAR(255) NOT NULL,
+	direccion_destino_mensajeria NVARCHAR(255) NOT NULL,
+	cod_localidad INT NOT NULL,
+	km_mensajeria DECIMAL(18,2) NOT NULL,
+	cod_tipo_paquete INT NOT NULL,
+	valor_asegurado_mensajeria DECIMAL(18,2) NOT NULL,
+	observaciones_mensajeria NVARCHAR(255) NULL,
+	precio_envio_mensajeria  DECIMAL(18,2) NOT NULL,
+	precio_seguro_mensajeria  DECIMAL(18,2) NOT NULL,
+	cod_repartidor INT NOT NULL,
+	propina_mensajeria  DECIMAL(18,2) NULL,
+	cod_medio_pago INT NOT NULL,
+	total_mensajeria  DECIMAL(18,2) NOT NULL,
+	cod_estado_mensajeria INT NOT NULL,
+	tiempo_entrega_estimado_mensajeria  DECIMAL(18,2) NOT NULL,
+	fecha_entrega_mensajeria DATETIME2(3) NULL,
+	calificacion_mensajeria DECIMAL(18,2) NULL,
+	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
+	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades,
+	FOREIGN KEY (cod_tipo_paquete) REFERENCES D_DE_DATOS.tipos_paquetes,
+	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.repartidores,
+	FOREIGN KEY (cod_medio_pago) REFERENCES D_DE_DATOS.medios_pago,
+	FOREIGN KEY (cod_estado_mensajeria) REFERENCES D_DE_DATOS.estados_mensajeria
+);
 
 ---------------- FUNCIONES ----------------
 
@@ -268,153 +265,6 @@ END;
 GO
 
 
----------------------------------------------------------------------------------
-
---Creación de vistas
-
--- ● Día de la semana y franja horaria con mayor cantidad de pedidos según la
--- localidad y categoría del local, para cada mes de cada año.
---CREATE VIEW BI_D_DE_DATOS_MAYOR_CANTIDAD_PEDIDOS
---AS
---	SELECT T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local,
---	(SELECT COUNT(*) FROM P) cantidadPedidos
---	FROM D_DE_DATOS.BI_PEDIDOS P
---	JOIN D_DE_DATOS.BI_LOCALES LO ON P.cod_local = LO.cod_local
---	JOIN D_DE_DATOS.BI_ENVIOS E ON P.cod_pedido = E.cod_pedido
---	JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
---	JOIN D_DE_DATOS.BI_CATEGORIAS_LOCALES CL ON LO.cod_categoria_local = CL.cod_categoria_local
---	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
---	GROUP BY T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local
---GO
--- ● Monto total no cobrado por cada local en función de los pedidos
--- cancelados según el día de la semana y la franja horaria (cuentan como
--- pedidos cancelados tanto los que cancela el usuario como el local).
---CREATE VIEW BI_D_DE_DATOS_MONTO_NO_COBRADO
---AS
---	SELECT D.desc_dia, R.desc_rango_horario, L.nombre_local,
---	(SELECT SUM(total_pedido) FROM P WHERE dia_entrega IS NULL) totalPedidosEnregados
---	FROM D_DE_DATOS.BI_PEDIDOS P
---	JOIN D_DE_DATOS.BI_DIAS D ON P.dia_pedido = D.desc_dia
---	JOIN D_DE_DATOS.BI_LOCALES L ON P.cod_local = L.cod_local
---	JOIN D_DE_DATOS.BI_RANGO_HORARIO R ON P.rango_horario_pedido = R.desc_rango_horario
---	GROUP BY D.desc_dia, R.desc_rango_horario, L.nombre_local
---GO
--- ● Valor promedio mensual que tienen los envíos de pedidos en cada
--- localidad.
--- mes | localidad | promedioPrecioEnvios
- --CREATE VIEW BI_D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD
- --AS  
- --    SELECT T.tiempo_mes, L.nombre_localidad,
- --    (SUM(E.precio_envio) / (SELECT COUNT(*) FROM E)) promedioPrecioEnvios
-
- --    FROM D_DE_DATOS.BI_ENVIOS E
- --    JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
- --    JOIN D_DE_DATOS.BI_PEDIDOS P ON E.cod_pedido = P.cod_pedido
- --    JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_entrega = T.tiempo_mes
-	-- GROUP BY T.tiempo_mes, L.nombre_localidad
- --GO
--- ● Desvío promedio en tiempo de entrega según el tipo de movilidad, el día
--- de la semana y la franja horaria.
--- El desvío debe calcularse en minutos y representa la diferencia entre la
--- fecha/hora en que se realizó el pedido y la fecha/hora que se entregó en
--- comparación con los minutos de tiempo estimados.
--- Este indicador debe tener en cuenta todos los envíos, es decir, sumar tanto
--- los envíos de pedidos como los de mensajería.
--- ● Monto total de los cupones utilizados por mes en función del rango etario
--- de los usuarios. /*NOS FALTAN CUPONES*/
---CREATE VIEW BI_D_DE_DATOS_MONTO_TOTAL_CUPONES
---AS
---	SELECT T.tiempo_mes, RE.desc_rango_etario, SUM(C.monto_cupon) sumaMontoCupones
---	FROM D_DE_DATOS.BI_USUARIOS U
---	JOIN D_DE_DATOS.BI_CUPONES C ON U.cod_usuario = C.cod_usuario
---	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON U.rango_etario = RE.cod_rango_etario
---	JOIN D_DE_DATOS.BI_TIEMPO T ON C.mes_alta_cupon = T.tiempo_mes
---	GROUP BY T.tiempo_mes, RE.desc_rango_etario
---GO
--- ● Promedio de calificación mensual por local.
--- mes | local | promedio calificacion
- --CREATE VIEW BI_D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
- --AS
- --    SELECT T.tiempo_mes, L.desc_local, 
- --    (SUM(P.calificacion_pedido) / (SELECT COUNT(*) FROM P)) promedioCalificaciones
-
- --    FROM D_DE_DATOS.BI_LOCALES L
- --    JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
- --    JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
---     GROUP BY T.tiempo_mes, L.desc_local
- --GO
--- ● Porcentaje de pedidos y mensajería entregados mensualmente según el
--- rango etario de los repartidores y la localidad.
--- Este indicador se debe tener en cuenta y sumar tanto los envíos de pedidos
--- como los de mensajería.
--- El porcentaje se calcula en función del total general de pedidos y envíos
--- mensuales entregados. /*HECHO SOLO PARA PEDIDOS*/
---CREATE VIEW BI_D_DE_DATOS_PORCENTAJE_PEDIDOS_Y_ENVIOS_ENTREGADOS
---AS
---	SELECT T.tiempo_mes, L.desc_localidad, RE.desc_rango_etario,
---	((SELECT COUNT(*) FROM P WHERE dia_entrega IS NOT NULL /*pedidos entregados*/) / (SELECT COUNT(*) FROM P /*pedidos totales*/) porcentaje
---	FROM D_DE_DATOS.BI_PEDIDOS P
---	JOIN D_DE_DATOS.BI_ENVIO E ON P.cod_pedido = E.cod_envio
---	JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
---	JOIN D_DE_DATOS.BI_REPARTIDORES R ON E.cod_repartidor = R.cod_repartidor
---	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON R.rango_etario = RE.cod_rango_etario
---	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
---	GROUP BY T.tiempo_mes, L.desc_localidad, RE.desc_rango_etario
---GO
--- ● Promedio mensual del valor asegurado (valor declarado por el usuario) de
--- los paquetes enviados a través del servicio de mensajería en función del
--- tipo de paquete. /*NOS FALTA ENVIO MENSAJERIA, LO HAGO COMO SI LO TUVIERAMOS */
---CREATE VIEW BI_D_DE_DATOS_PROMEDIO_VALOR_ASEGURADO
---AS
---	SELECT T.tiempo_mes, TP.cod_tipo_paquete /*como no tenemos desc_tipo_paquete no sabia si iba esto
---	o el precio*/, 
---	((SELECT SUM(valor_asegurado_mensajeria) FROM EM) / (SELECT COUNT(*) FROM EM)) promedio
---	FROM D_DE_DATOS.BI_ENVIOS_MENSAJERIA EM
---	JOIN D_DE_DATOS.BI_TIPOS_PAQUETES TP ON EM.cod_tipo_paquete = TP.cod_tipo_paquete
---	JOIN D_DE_DATOS.BI_TIEMPO T ON EM.mes_envio_mensajeria = T.tiempo_mes
---	GROUP BY T.tiempo_mes, TP.cod_tipo_paquete
---GO
--- ● Cantidad de reclamos mensuales recibidos por cada local en función del
--- día de la semana y rango horario.
--- mes | local | diaSemana | rangoHorario | cantidadReclamos
- --CREATE VIEW BI_D_DE_DATOS.CANTIDAD_RECLAMOS
- --AS
- --    SELECT T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo,
- --    (SELECT COUNT(*) FROM R) cantidadReclamos
-
- --    FROM D_DE_DATOS.BI_LOCALES L
- --    JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
- --    JOIN D_DE_DATOS.BI_RECLAMOS R ON P.cod_pedido = R.cod_pedido
- --    JOIN D_DE_DATOS.BI_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes
-	-- GROUP BY T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo
- --GO
--- ● Tiempo promedio de resolución de reclamos mensual según cada tipo de
--- reclamo y rango etario de los operadores.
--- El tiempo de resolución debe calcularse en minutos y representa la
--- diferencia entre la fecha/hora en que se realizó el reclamo y la fecha/hora
--- que se resolvió. /*NOS FALTA TIPO RECLAMO. PARA RESOLVER COMO PIDE NECESITARIAMOS LA HORA EXACTA DE INICIO Y 
-RESOLUCION DEL RECLAMO. POR AHORA SOLO TENEMOS EL RANGO HORARIO */
---CREATE VIEW BI_D_DE_DATOS_PROMEDIO_TIEMPO_SOLUCION_RECLAMOS
---AS
---	SELECT T.tiempo_mes, TR.desc_tipo_reclamo, RE.desc_rango_etario, 
---	((SELECT SUM(hora_fin_reclamo - hora_inicio_reclamo) FROM R) / (SELECT COUNT(*) FROM R)) promedio
---	FROM D_DE_DATOS.BI_ENVIOS_RECLAMOS R
---	JOIN D_DE_DATOS.BI_ENVIOS_TIPOS_RECLAMOS TR ON R.cod_tipo_reclamo = TR.cod_tipo_reclamo
---	JOIN D_DE_DATOS.BI_ENVIOS_OPERADORES O ON R.cod_operador = O.cod_operador
---	JOIN D_DE_DATOS.BI_ENVIOS_RANGO_ETARIO RE ON O.rengo_etario = RE.cod_rango_etario
---	JOIN D_DE_DATOS.BI_ENVIOS_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes
---	GROUP BY T.tiempo_mes, TR.desc_tipo_reclamo, RE.desc_rango_etario
---GO
--- ● Monto mensual generado en cupones a partir de reclamos. /*NOS FALTAN CUPONES*/
---CREATE VIEW BI_D_DE_DATOS_CUPONES_RECLAMOS
---AS
---	SELECT T.tiempo_mes, SUM(C.monto_cupon) sumaMontoCupones
---	FROM D_DE_DATOS.BI_CUPONES C
---	JOIN D_DE_DATOS.BI_TIPOS_CUPONES TC ON C.cod_tipo_cupon = TC.cod_tipo_cupon
---	WHERE TC.desc_tipo_cupon = '/*acá va cupón de reclamo*/'
---	GROUP BY T.tiempo_mes
--- GO
-
 
 ---------------------------------------------------------------------------------------
 
@@ -462,7 +312,7 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_LOCALIDADES
  AS
   BEGIN
-    INSERT INTO D_DE_DATOS.BI_LOCALIDADES (cod_localidad, nombre_localidad, provincia_localidad)
+    INSERT INTO D_DE_DATOS.BI_LOCALIDADES (cod_localidad,nombre_localidad, provincia_localidad)
 		SELECT cod_localidad, nombre_localidad, provincia_localidad
 		FROM D_DE_DATOS.LOCALIDADES
   END
@@ -472,14 +322,31 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_LOCALES
  AS
   BEGIN
-    INSERT INTO D_DE_DATOS.BI_LOCALES (nombre_local, desc_local, cod_localidad, cod_tipo_local, cod_categoria_local)
-		SELECT L.nombre_local, L.desc_local, LO.cod_localidad, TL.cod_tipo_local, CL.cod_categoria_local
+    INSERT INTO D_DE_DATOS.BI_LOCALES (cod_local, nombre_local, desc_local, cod_localidad, cod_tipo_local, cod_categoria_local,direccion_local)
+		SELECT L.cod_local, L.nombre_local, L.desc_local, L.cod_localidad, L.cod_tipo_local, L.cod_categoria_local, L.direccion_local
 		FROM D_DE_DATOS.LOCALES L
-		INNER JOIN D_DE_DATOS.LOCALIDADES LO ON L.cod_localidad = LO.cod_localidad
-		INNER JOIN D_DE_DATOS.TIPOS_LOCALES TL ON L.cod_tipo_local = TL.cod_tipo_local
-		INNER JOIN D_DE_DATOS.CATEGORIAS_LOCALES CL ON L.cod_categoria_local = CL.cod_categoria_local
   END
 GO
+
+-- Tipo paquete
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_PAQUETES
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_TIPOS_PAQUETES (cod_tipo_paquete,precio_paquete)
+		SELECT cod_tipo_paquete, precio_paquete FROM D_DE_DATOS.TIPOS_PAQUETES
+  END
+GO
+
+--Tiempo 
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIEMPO
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_TIEMPO (tiempo_anio,tiempo_mes)
+		SELECT DISTINCT YEAR(fecha_pedido), MONTH(fecha_pedido)
+		FROM D_DE_DATOS.PEDIDOS
+  END
+GO
+
 
 ---------------------------------------------------------------------------------------
 
@@ -489,10 +356,9 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_REPARTIDORES
  AS
   BEGIN
-    INSERT INTO D_DE_DATOS.BI_REPARTIDORES (rango_etario, cod_movilidad_repartidor)
-		SELECT D_DE_DATOS.CALCULAR_RANGO_ETARIO(fecha_nacimiento_repartidor), TM.cod_movilidad_repartidor
+    INSERT INTO D_DE_DATOS.BI_REPARTIDORES (cod_repartidor, rango_etario, cod_movilidad_repartidor)
+		SELECT R.cod_repartidor,D_DE_DATOS.CALCULAR_RANGO_ETARIO(R.fecha_nacimiento_repartidor), R.cod_movilidad_repartidor
 		FROM D_DE_DATOS.REPARTIDORES R
-		INNER JOIN D_DE_DATOS.TIPOS_MOVILIDAD TM ON TM.cod_movilidad_repartidor = R.cod_movilidad_repartidor
   END
 GO
 
@@ -500,9 +366,9 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_USUARIOS
  AS
   BEGIN
-    INSERT INTO D_DE_DATOS.BI_USUARIOS (rango_etario, fecha_nacimiento_usuario)
-		SELECT D_DE_DATOS.CALCULAR_RANGO_ETARIO(fecha_nacimiento_usuario), fecha_nacimiento_usuario
-		FROM D_DE_DATOS.USUARIOS
+    INSERT INTO D_DE_DATOS.BI_USUARIOS (cod_usuario, rango_etario, fecha_nacimiento_usuario)
+		SELECT U.cod_usuario, D_DE_DATOS.CALCULAR_RANGO_ETARIO(U.fecha_nacimiento_usuario), U.fecha_nacimiento_usuario
+		FROM D_DE_DATOS.USUARIOS U
   END
 GO
 
@@ -510,52 +376,40 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_OPERADORES
  AS
   BEGIN
-    INSERT INTO D_DE_DATOS.BI_OPERADORES (rango_etario, fecha_nacimiento_operador)
-		SELECT D_DE_DATOS.CALCULAR_RANGO_ETARIO(fecha_nacimiento_operador), fecha_nacimiento_operador
-		FROM D_DE_DATOS.OPERADORES
+    INSERT INTO D_DE_DATOS.BI_OPERADORES (cod_operador, rango_etario, fecha_nacimiento_operador)
+		SELECT O.cod_operador, D_DE_DATOS.CALCULAR_RANGO_ETARIO(O.fecha_nacimiento_operador), O.fecha_nacimiento_operador
+		FROM D_DE_DATOS.OPERADORES O
   END
 GO
 
--- Tipo paquete
-CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_PAQUETES
- AS
-  BEGIN
-    INSERT INTO D_DE_DATOS.BI_TIPOS_PAQUETES (precio_paquete)
-		SELECT precio_paquete FROM D_DE_DATOS.TIPOS_PAQUETES
-  END
-GO
-
--- Envios
-CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_ENVIOS
- AS
-  BEGIN
-    INSERT INTO D_DE_DATOS.BI_ENVIOS (cod_direccion_usuario,
-	precio_envio,
-	cod_repartidor,
-	cod_localidad,
-	cod_pedido)
-		SELECT D.cod_direccion_usuario, E.precio_envio, R.cod_repartidor, L.cod_localidad, P.cod_pedido
-		  FROM D_DE_DATOS.ENVIOS E
-		  INNER JOIN D_DE_DATOS.DIRECCIONES_USUARIOS D on E.cod_direccion_usuario = D.co
-		  INNER JOIN D_DE_DATOS.REPARTIDORES R on E.cod_repartidor = R.cod_repartidor
-		  INNER JOIN D_DE_DATOS.LOCALIDADES L on E.cod_localidad = L.cod_localidad
-		  INNER JOIN D_DE_DATOS.PEDIDOS P on E.cod_pedido = P.cod_pedido
-		  END
-GO
 
 ---------------------------------------------------------------------------------------
 
 ---------------- MIGRACIONES A HECHOS ----------------
 
 -- Hechos pedidos
+/*cod_pedido DECIMAL(18,0) PRIMARY KEY,
+	dia_pedido NVARCHAR(30) NOT NULL,
+	mes_pedido INT NOT NULL,
+	anio_pedido INT NOT NULL,
+	rango_horario_pedido INT NOT NULL,
+	dia_entrega INT NOT NULL,
+	mes_entrega INT NOT NULL, 
+	anio_entrega INT NOT NULL
+	rango_horario_entrega INT NOT NULL, 
+	cod_local INT NOT NULL, 
+	tarifa_servicio_pedido DECIMAL(18,2) NOT NULL,
+	total_productos_pedido DECIMAL(18,2) NOT NULL,
+	total_pedido DECIMAL(18,2) NOT NULL,
+	total_descuentos DECIMAL(18,2) NOT NULL,
+	calificacion_pedido DECIMAL(18,0) NULL,*/
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
  AS
   BEGIN
     INSERT INTO D_DE_DATOS.BI_PEDIDOS 
 	(cod_pedido,
 	dia_pedido,
-	mes_pedido,
-	anio_pedido,
+	cod_tiempo,
 	rango_horario_pedido,
 	dia_entrega,
 	mes_entrega,
@@ -566,13 +420,11 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
 	total_productos_pedido,
 	total_pedido,
 	total_descuentos,
-	total_servicios,
 	calificacion_pedido
 	)
 		SELECT cod_pedido,
 		  D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_pedido) AS dia_pedido,
-		  YEAR(fecha_pedido) AS anio_pedido,
-  		  MONTH(fecha_pedido) AS mes_pedido,
+		  T.cod_tiempo,
 		  D_DE_DATOS.CALCULAR_RANGO_HORARIO(fecha_pedido) AS rango_horario_pedido,
 		  D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_entrega_pedido) AS dia_entrega,
 		  YEAR(fecha_entrega_pedido) AS anio_entrega,
@@ -583,10 +435,238 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
 		  total_productos_pedido,
 		  total_pedido,
 		  total_descuentos,
-		  total_servicios,
 		  calificacion_pedido
-		  FROM D_DE_DATOS.PEDIDOS
+		  FROM D_DE_DATOS.PEDIDOS P
+		  INNER JOIN D_DE_DATOS.BI_TIEMPO T ON (T.tiempo_anio = YEAR(P.fecha_pedido) AND T.tiempo_mes = MONTH(P.fecha_pedido))
 		  END
 GO
 
+
+-- Envios
+
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_ENVIOS
+ AS
+	BEGIN
+    INSERT INTO D_DE_DATOS.BI_ENVIOS (
+	cod_direccion_usuario,
+	precio_envio,
+	cod_repartidor,
+	cod_localidad,
+	cod_pedido)
+		SELECT E.cod_direccion_usuario, E.precio_envio, E.cod_repartidor,E.cod_localidad, E.cod_pedido
+		  FROM D_DE_DATOS.ENVIOS E
+	END
+GO
+
 -- Faltan migraciones a pedidos, envios y entiendo que a servicios_mensajeria
+
+---------------- TABLAS DE HECHOS ----------------
+
+-- Hechos pedidos
+CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
+	cod_pedido DECIMAL(18,0) PRIMARY KEY,
+	dia_pedido NVARCHAR(30) NOT NULL,
+	cod_tiempo INT NOT NULL,
+	rango_horario_pedido INT NOT NULL,
+	dia_entrega INT NOT NULL,
+	mes_entrega INT NOT NULL, 
+	anio_entrega INT NOT NULL,
+	rango_horario_entrega INT NOT NULL, 
+	cod_local INT NOT NULL, 
+	tarifa_servicio_pedido DECIMAL(18,2) NOT NULL,
+	total_productos_pedido DECIMAL(18,2) NOT NULL,
+	total_pedido DECIMAL(18,2) NOT NULL,
+	total_descuentos DECIMAL(18,2) NOT NULL,
+	calificacion_pedido DECIMAL(18,0) NULL,
+	FOREIGN KEY (cod_local) REFERENCES D_DE_DATOS.BI_LOCALES,
+	FOREIGN KEY (cod_tiempo) REFERENCES D_DE_DATOS.BI_TIEMPO
+);
+
+-- Hechos envios
+CREATE TABLE D_DE_DATOS.BI_ENVIOS (
+	cod_envio INT IDENTITY(1,1) PRIMARY KEY,
+	cod_direccion_usuario INT NOT NULL,
+	precio_envio DECIMAL(18,2) NOT NULL,
+	cod_repartidor INT NOT NULL,
+	cod_localidad INT NOT NULL,
+	cod_pedido DECIMAL(18,0) NOT NULL,
+	FOREIGN KEY (cod_direccion_usuario) REFERENCES D_DE_DATOS.BI_DIRECCIONES_USUARIOS,
+	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.BI_REPARTIDORES,
+	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.BI_LOCALIDADES,
+	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS
+);
+
+-- Hechos reclamos - a revisar
+CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
+	cod_reclamo DECIMAL(18,0) PRIMARY KEY,
+	cod_usuario INT NOT NULL,
+	cod_pedido DECIMAL(18,0) NOT NULL,
+	cod_tipo_reclamo INT NOT NULL,
+	desc_reclamo NVARCHAR(255) NULL,
+	dia_inicio_reclamo NVARCHAR(30),
+	mes_inicio_reclamo INT NOT NULL,
+	anio_inicio_reclamo INT NOT NULL,
+	rango_horario_inicio_reclamo INT NOT NULL,
+	dia_solucion NVARCHAR(30),
+	mes_solucion INT NOT NULL,
+	anio_solucion INT NOT NULL, 
+	rango_horario_solucion INT NOT NULL,
+	cod_operador INT NOT NULL,
+	cod_estado_reclamo INT NOT NULL,
+	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.BI_USUARIOS,
+	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS,
+	FOREIGN KEY (cod_tipo_reclamo) REFERENCES D_DE_DATOS.BI_TIPOS_RECLAMOS,
+	FOREIGN KEY (cod_operador) REFERENCES D_DE_DATOS.BI_OPERADORES,
+	FOREIGN KEY (cod_estado_reclamo) REFERENCES D_DE_DATOS.BI_ESTADOS_RECLAMOS
+);
+
+-------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------------
+
+--Creación de vistas
+
+-- ● Día de la semana y franja horaria con mayor cantidad de pedidos según la
+-- localidad y categoría del local, para cada mes de cada año.
+CREATE VIEW BI_D_DE_DATOS_MAYOR_CANTIDAD_PEDIDOS
+AS
+SELECT T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local,
+(SELECT COUNT(*) FROM P) cantidadPedidos
+FROM D_DE_DATOS.BI_PEDIDOS P
+	JOIN D_DE_DATOS.BI_LOCALES LO ON P.cod_local = LO.cod_local
+	JOIN D_DE_DATOS.BI_ENVIOS E ON P.cod_pedido = E.cod_pedido
+	JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+	JOIN D_DE_DATOS.BI_CATEGORIAS_LOCALES CL ON LO.cod_categoria_local = CL.cod_categoria_local
+	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
+GROUP BY T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local
+GO
+
+-- ● Monto total no cobrado por cada local en función de los pedidos
+-- cancelados según el día de la semana y la franja horaria (cuentan como
+-- pedidos cancelados tanto los que cancela el usuario como el local).
+CREATE VIEW BI_D_DE_DATOS_MONTO_NO_COBRADO
+AS
+	SELECT D.desc_dia, R.desc_rango_horario, L.nombre_local,
+	(SELECT SUM(total_pedido) FROM P WHERE dia_entrega IS NULL) totalPedidosEnregados
+	FROM D_DE_DATOS.BI_PEDIDOS P
+	JOIN D_DE_DATOS.BI_DIAS D ON P.dia_pedido = D.desc_dia
+	JOIN D_DE_DATOS.BI_LOCALES L ON P.cod_local = L.cod_local
+	JOIN D_DE_DATOS.BI_RANGO_HORARIO R ON P.rango_horario_pedido = R.desc_rango_horario
+	GROUP BY D.desc_dia, R.desc_rango_horario, L.nombre_local
+GO
+-- ● Valor promedio mensual que tienen los envíos de pedidos en cada
+-- localidad.
+-- mes | localidad | promedioPrecioEnvios
+ CREATE VIEW BI_D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD
+ AS  
+    SELECT T.tiempo_mes, L.nombre_localidad,
+    (SUM(E.precio_envio) / (SELECT COUNT(*) FROM E)) promedioPrecioEnvios
+
+     FROM D_DE_DATOS.BI_ENVIOS E
+     JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+     JOIN D_DE_DATOS.BI_PEDIDOS P ON E.cod_pedido = P.cod_pedido
+     JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_entrega = T.tiempo_mes
+	 GROUP BY T.tiempo_mes, L.nombre_localidad
+ GO
+-- ● Desvío promedio en tiempo de entrega según el tipo de movilidad, el día
+-- de la semana y la franja horaria.
+-- El desvío debe calcularse en minutos y representa la diferencia entre la
+-- fecha/hora en que se realizó el pedido y la fecha/hora que se entregó en
+-- comparación con los minutos de tiempo estimados.
+-- Este indicador debe tener en cuenta todos los envíos, es decir, sumar tanto
+-- los envíos de pedidos como los de mensajería.
+-- ● Monto total de los cupones utilizados por mes en función del rango etario
+-- de los usuarios. /*NOS FALTAN CUPONES*/
+CREATE VIEW BI_D_DE_DATOS_MONTO_TOTAL_CUPONES
+AS
+	SELECT T.tiempo_mes, RE.desc_rango_etario, SUM(C.monto_cupon) sumaMontoCupones
+	FROM D_DE_DATOS.BI_USUARIOS U
+	JOIN D_DE_DATOS.BI_CUPONES C ON U.cod_usuario = C.cod_usuario
+	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON U.rango_etario = RE.cod_rango_etario
+	JOIN D_DE_DATOS.BI_TIEMPO T ON C.mes_alta_cupon = T.tiempo_mes
+	GROUP BY T.tiempo_mes, RE.desc_rango_etario
+GO
+-- ● Promedio de calificación mensual por local.
+-- mes | local | promedio calificacion
+CREATE VIEW BI_D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
+ AS
+     SELECT T.tiempo_mes, L.desc_local, 
+     (SUM(P.calificacion_pedido) / (SELECT COUNT(*) FROM P)) promedioCalificaciones
+
+     FROM D_DE_DATOS.BI_LOCALES L
+     JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
+    JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
+    GROUP BY T.tiempo_mes, L.desc_local
+ GO
+-- ● Porcentaje de pedidos y mensajería entregados mensualmente según el
+-- rango etario de los repartidores y la localidad.
+-- Este indicador se debe tener en cuenta y sumar tanto los envíos de pedidos
+-- como los de mensajería.
+-- El porcentaje se calcula en función del total general de pedidos y envíos
+-- mensuales entregados. /*HECHO SOLO PARA PEDIDOS*/
+CREATE VIEW BI_D_DE_DATOS_PORCENTAJE_PEDIDOS_Y_ENVIOS_ENTREGADOS
+AS
+	SELECT T.tiempo_mes, L.desc_localidad, RE.desc_rango_etario,
+	(SELECT COUNT(*) FROM P WHERE dia_entrega IS NOT NULL /*pedidos entregados*/) / (SELECT COUNT(*) FROM P /*pedidos totales*/) porcentaje
+	FROM D_DE_DATOS.BI_PEDIDOS P
+	JOIN D_DE_DATOS.BI_ENVIO E ON P.cod_pedido = E.cod_envio
+JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+	JOIN D_DE_DATOS.BI_REPARTIDORES R ON E.cod_repartidor = R.cod_repartidor
+	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON R.rango_etario = RE.cod_rango_etario
+	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
+	GROUP BY T.tiempo_mes, L.desc_localidad, RE.desc_rango_etario
+GO
+-- ● Promedio mensual del valor asegurado (valor declarado por el usuario) de
+-- los paquetes enviados a través del servicio de mensajería en función del
+-- tipo de paquete. /*NOS FALTA ENVIO MENSAJERIA, LO HAGO COMO SI LO TUVIERAMOS */
+CREATE VIEW BI_D_DE_DATOS_PROMEDIO_VALOR_ASEGURADO
+AS
+SELECT T.tiempo_mes, TP.cod_tipo_paquete /*como no tenemos desc_tipo_paquete no sabia si iba esto
+	o el precio*/, 
+	((SELECT SUM(valor_asegurado_mensajeria) FROM EM) / (SELECT COUNT(*) FROM EM)) promedio
+	FROM D_DE_DATOS.BI_ENVIOS_MENSAJERIA EM
+	JOIN D_DE_DATOS.BI_TIPOS_PAQUETES TP ON EM.cod_tipo_paquete = TP.cod_tipo_paquete
+JOIN D_DE_DATOS.BI_TIEMPO T ON EM.mes_envio_mensajeria = T.tiempo_mes
+	GROUP BY T.tiempo_mes, TP.cod_tipo_paquete
+GO
+-- ● Cantidad de reclamos mensuales recibidos por cada local en función del
+-- día de la semana y rango horario.
+-- mes | local | diaSemana | rangoHorario | cantidadReclamos
+ CREATE VIEW BI_D_DE_DATOS.CANTIDAD_RECLAMOS
+ AS
+     SELECT T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo,
+     (SELECT COUNT(*) FROM R) cantidadReclamos
+
+     FROM D_DE_DATOS.BI_LOCALES L
+     JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
+    JOIN D_DE_DATOS.BI_RECLAMOS R ON P.cod_pedido = R.cod_pedido
+    JOIN D_DE_DATOS.BI_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes
+	GROUP BY T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo
+ GO
+-- ● Tiempo promedio de resolución de reclamos mensual según cada tipo de
+-- reclamo y rango etario de los operadores.
+-- El tiempo de resolución debe calcularse en minutos y representa la
+-- diferencia entre la fecha/hora en que se realizó el reclamo y la fecha/hora
+-- que se resolvió. /*NOS FALTA TIPO RECLAMO. PARA RESOLVER COMO PIDE NECESITARIAMOS LA HORA EXACTA DE INICIO Y 
+/*RESOLUCION DEL RECLAMO. POR AHORA SOLO TENEMOS EL RANGO HORARIO */
+CREATE VIEW BI_D_DE_DATOS_PROMEDIO_TIEMPO_SOLUCION_RECLAMOS
+AS
+	SELECT T.tiempo_mes, TR.desc_tipo_reclamo, RE.desc_rango_etario, 
+	((SELECT SUM(hora_fin_reclamo - hora_inicio_reclamo) FROM R) / (SELECT COUNT(*) FROM R)) promedio
+	FROM D_DE_DATOS.BI_ENVIOS_RECLAMOS R
+JOIN D_DE_DATOS.BI_ENVIOS_TIPOS_RECLAMOS TR ON R.cod_tipo_reclamo = TR.cod_tipo_reclamo
+	JOIN D_DE_DATOS.BI_ENVIOS_OPERADORES O ON R.cod_operador = O.cod_operador
+	JOIN D_DE_DATOS.BI_ENVIOS_RANGO_ETARIO RE ON O.rengo_etario = RE.cod_rango_etario
+JOIN D_DE_DATOS.BI_ENVIOS_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes	GROUP BY T.tiempo_mes, TR.desc_tipo_reclamo, RE.desc_rango_etario
+GO
+-- ● Monto mensual generado en cupones a partir de reclamos. /*NOS FALTAN CUPONES*/
+CREATE VIEW BI_D_DE_DATOS_CUPONES_RECLAMOS
+AS
+	SELECT T.tiempo_mes, SUM(C.monto_cupon) sumaMontoCupones
+	FROM D_DE_DATOS.BI_CUPONES C
+	JOIN D_DE_DATOS.BI_TIPOS_CUPONES TC ON C.cod_tipo_cupon = TC.cod_tipo_cupon
+	WHERE TC.desc_tipo_cupon = /*acá va cupón de reclamo*/
+	GROUP BY T.tiempo_mes
+ GO
+

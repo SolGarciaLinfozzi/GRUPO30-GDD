@@ -754,7 +754,6 @@ EXECUTE D_DE_DATOS.MigrarLocales;
 EXECUTE D_DE_DATOS.MigrarHorariosLocales;
 EXECUTE D_DE_DATOS.MigrarProductosLocales;
 EXECUTE D_DE_DATOS.MigrarRepartidores;
-EXECUTE D_DE_DATOS.MigrarEnvios;
 EXECUTE D_DE_DATOS.MigrarPedidos;
 EXECUTE D_DE_DATOS.MigrarItems;
 EXECUTE D_DE_DATOS.MigrarCuponesDescuento;
@@ -762,6 +761,7 @@ EXECUTE D_DE_DATOS.MigrarPedidosCupon;
 EXECUTE D_DE_DATOS.MigrarReclamos;
 EXECUTE D_DE_DATOS.MigrarReclamosCupon;
 EXECUTE D_DE_DATOS.MigrarServiciosMensajeria;
+EXECUTE D_DE_DATOS.MigrarEnvios;
 
 PRINT 'Migracion finalizada exitosamente'
 GO 
