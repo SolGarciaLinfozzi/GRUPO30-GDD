@@ -420,26 +420,38 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_LOCALIDADES
   END
 GO
 
--- Tipo Medio de pago FALTA MIGRAR
-CREATE TABLE D_DE_DATOS.BI_TIPOS_MEDIOS_PAGO (
-	cod_tipo_medio_pago INT PRIMARY KEY,
-	desc_tipo_medio_pago NVARCHAR(50) NOT NULL
-);
+-- Tipo Medio de pago 
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_MEDIOS_PAGO
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_TIPOS_MEDIOS_PAGO (cod_tipo_medio_pago,desc_tipo_medio_pago)
+		SELECT cod_tipo_medio_pago,desc_tipo_medio_pago
+		FROM D_DE_DATOS.TIPOS_MEDIOS_PAGO
+  END
+GO
 
 
 -- Tipo de Local/Categoría de Local
 
--- Tipo de Local FALTA MIGRAR
-CREATE TABLE D_DE_DATOS.BI_TIPOS_LOCALES (
-    cod_tipo_local INT PRIMARY KEY,
-	desc_tipo_local NVARCHAR(50) NOT NULL
-);
+-- Tipo de Local
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_LOCALES
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_TIPOS_LOCALES (cod_tipo_local,desc_tipo_local)
+		SELECT cod_tipo_local,desc_tipo_local
+		FROM D_DE_DATOS.TIPOS_LOCALES
+  END
+GO
 
--- Categoria de Local FALTA MIGRAR
-CREATE TABLE D_DE_DATOS.BI_CATEGORIAS_LOCALES (
-    cod_categoria_local INT PRIMARY KEY,
-	desc_categoria_local NVARCHAR(50) NOT NULL
-);
+-- Categoria de Local
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_CATEGORIAS_LOCALES
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_CATEGORIAS_LOCALES (cod_categoria_local,desc_categoria_local)
+		SELECT cod_categoria_local,desc_categoria_local
+		FROM D_DE_DATOS.CATEGORIAS_LOCALES
+  END
+GO
 
 
 -- Local
@@ -452,11 +464,15 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_LOCALES
   END
 GO
 
--- Tipo Movilidad FALTA MIGRAR
-CREATE TABLE D_DE_DATOS.BI_TIPOS_MOVILIDAD (
-	cod_movilidad_repartidor INT PRIMARY KEY,
-	desc_movilidad_repartidor NVARCHAR(50) NOT NULL
-);
+-- Tipo Movilidad
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_MOVILIDAD
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_TIPOS_MOVILIDAD (cod_movilidad_repartidor,desc_movilidad_repartidor)
+		SELECT cod_movilidad_repartidor,desc_movilidad_repartidor
+		FROM D_DE_DATOS.TIPOS_MOVILIDAD
+  END
+GO
 
 -- Tipo paquete
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_PAQUETES
@@ -467,19 +483,25 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_PAQUETES
   END
 GO
 
----FALTA MIGRAR:
-
 -- Estados pedidos
-CREATE TABLE D_DE_DATOS.BI_ESTADOS_PEDIDOS (
-    cod_estado_pedido INT  PRIMARY KEY,
-	desc_estado_pedido NVARCHAR(50) NOT NULL
-);
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_ESTADOS_PEDIDOS
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_ESTADOS_PEDIDOS (cod_estado_pedido,desc_estado_pedido)
+		SELECT cod_estado_pedido,desc_estado_pedido
+		FROM D_DE_DATOS.ESTADOS_PEDIDOS
+  END
+GO
 
 -- Estado envíos mensajería
-CREATE TABLE D_DE_DATOS.BI_ESTADOS_MENSAJERIA (
-	cod_estado_mensajeria INT  PRIMARY KEY,
-	desc_estado_mensajeria NVARCHAR(50) NOT NULL
-);
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_ESTADOS_MENSAJERIA
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_ESTADOS_MENSAJERIA (cod_estado_mensajeria,desc_estado_mensajeria)
+		SELECT cod_estado_mensajeria,desc_estado_mensajeria
+		FROM D_DE_DATOS.ESTADOS_MENSAJERIA
+  END
+GO
 
 -- Estados reclamos
 CREATE TABLE D_DE_DATOS.BI_ESTADOS_RECLAMOS (
