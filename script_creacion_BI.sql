@@ -699,18 +699,17 @@ GO
 -- para cada mes de cada año.
 
 CREATE VIEW D_DE_DATOS.MAYOR_CANTIDAD_PEDIDOS
-(Dia, Mes, Año, FranjaHoraria, Localidad, Provincia, CategoriaLocal, TipoLocal, CantidadPedidos) 
 AS
-SELECT 
-D.desc_dia,
-T.tiempo_mes,
-T.tiempo_anio,
-R.desc_rango_horario,
-LO.nombre_localidad,
-LO.provincia_localidad,
-C.desc_categoria_local,
-TL.desc_tipo_local,
-COUNT(P.cod_pedido)
+SELECT TOP 1 WITH TIES
+    D.desc_dia AS Dia,
+    T.tiempo_mes AS Mes,
+    T.tiempo_anio AS Anio,
+    R.desc_rango_horario AS FranjaHoraria,
+    LO.nombre_localidad AS Localidad,
+    LO.provincia_localidad AS Provincia,
+    C.desc_categoria_local AS CategoriaLocal,
+    TL.desc_tipo_local AS TipoLocal,
+    COUNT(P.cod_pedido) AS CantidadPedidos
 FROM D_DE_DATOS.BI_PEDIDOS P
 LEFT JOIN D_DE_DATOS.BI_TIEMPO T ON P.cod_tiempo_pedido = T.cod_tiempo
 LEFT JOIN D_DE_DATOS.BI_DIAS D ON P.cod_dia_pedido = D.cod_dia
@@ -724,11 +723,17 @@ GROUP BY
     T.tiempo_mes,
     T.tiempo_anio,
     R.desc_rango_horario,
-	LO.nombre_localidad,
+    LO.nombre_localidad,
     LO.provincia_localidad,
-	C.desc_categoria_local,
-    TL.desc_tipo_local;
-GO
+    C.desc_categoria_local,
+    TL.desc_tipo_local
+ORDER BY
+    ROW_NUMBER() OVER (PARTITION BY T.tiempo_mes, T.tiempo_anio ORDER BY COUNT(P.cod_pedido) DESC);
+
+
+
+
+---------------------------------------------------------------------------
 
 --CREATE VIEW BI_D_DE_DATOS_MAYOR_CANTIDAD_PEDIDOS
 --AS
