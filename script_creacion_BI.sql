@@ -693,6 +693,8 @@ GO
 
 --Creación de vistas
 
+
+--VISTA 1
 -- Día de la semana y franja horaria 
 -- con mayor cantidad de pedidos 
 -- según la localidad y categoría del local
@@ -730,9 +732,6 @@ GROUP BY
 ORDER BY
     ROW_NUMBER() OVER (PARTITION BY T.tiempo_mes, T.tiempo_anio ORDER BY COUNT(P.cod_pedido) DESC);
 
-
-
-
 ---------------------------------------------------------------------------
 
 --CREATE VIEW BI_D_DE_DATOS_MAYOR_CANTIDAD_PEDIDOS
@@ -749,8 +748,8 @@ ORDER BY
 --GO
 
 
-
--- ● Monto total no cobrado por cada local en función de los pedidos
+--VISTA 2
+-- Monto total no cobrado por cada local en función de los pedidos
 -- cancelados según el día de la semana y la franja horaria (cuentan como
 -- pedidos cancelados tanto los que cancela el usuario como el local).
 CREATE VIEW BI_D_DE_DATOS_MONTO_NO_COBRADO
@@ -763,7 +762,9 @@ AS
 	JOIN D_DE_DATOS.BI_RANGO_HORARIO R ON P.rango_horario_pedido = R.desc_rango_horario
 	GROUP BY D.desc_dia, R.desc_rango_horario, L.nombre_local
 GO
--- ● Valor promedio mensual que tienen los envíos de pedidos en cada
+
+--VISTA 3
+-- Valor promedio mensual que tienen los envíos de pedidos en cada
 -- localidad.
 -- mes | localidad | promedioPrecioEnvios
  CREATE VIEW BI_D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD
@@ -777,14 +778,18 @@ GO
      JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_entrega = T.tiempo_mes
 	 GROUP BY T.tiempo_mes, L.nombre_localidad
  GO
--- ● Desvío promedio en tiempo de entrega según el tipo de movilidad, el día
+
+--VISTA 4
+-- Desvío promedio en tiempo de entrega según el tipo de movilidad, el día
 -- de la semana y la franja horaria.
 -- El desvío debe calcularse en minutos y representa la diferencia entre la
 -- fecha/hora en que se realizó el pedido y la fecha/hora que se entregó en
 -- comparación con los minutos de tiempo estimados.
 -- Este indicador debe tener en cuenta todos los envíos, es decir, sumar tanto
 -- los envíos de pedidos como los de mensajería.
--- ● Monto total de los cupones utilizados por mes en función del rango etario
+
+--VISTA 5
+-- Monto total de los cupones utilizados por mes en función del rango etario
 -- de los usuarios. /*NOS FALTAN CUPONES*/
 CREATE VIEW BI_D_DE_DATOS_MONTO_TOTAL_CUPONES
 AS
@@ -795,7 +800,9 @@ AS
 	JOIN D_DE_DATOS.BI_TIEMPO T ON C.mes_alta_cupon = T.tiempo_mes
 	GROUP BY T.tiempo_mes, RE.desc_rango_etario
 GO
--- ● Promedio de calificación mensual por local.
+
+--VISTA 6
+-- Promedio de calificación mensual por local.
 -- mes | local | promedio calificacion
 CREATE VIEW BI_D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
  AS
@@ -807,7 +814,10 @@ CREATE VIEW BI_D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
     JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
     GROUP BY T.tiempo_mes, L.desc_local
  GO
--- ● Porcentaje de pedidos y mensajería entregados mensualmente según el
+
+
+--VISTA 7
+-- Porcentaje de pedidos y mensajería entregados mensualmente según el
 -- rango etario de los repartidores y la localidad.
 -- Este indicador se debe tener en cuenta y sumar tanto los envíos de pedidos
 -- como los de mensajería.
@@ -825,7 +835,10 @@ JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
 	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
 	GROUP BY T.tiempo_mes, L.desc_localidad, RE.desc_rango_etario
 GO
--- ● Promedio mensual del valor asegurado (valor declarado por el usuario) de
+
+
+--VISTA 8
+-- Promedio mensual del valor asegurado (valor declarado por el usuario) de
 -- los paquetes enviados a través del servicio de mensajería en función del
 -- tipo de paquete. /*NOS FALTA ENVIO MENSAJERIA, LO HAGO COMO SI LO TUVIERAMOS */
 CREATE VIEW BI_D_DE_DATOS_PROMEDIO_VALOR_ASEGURADO
@@ -838,7 +851,10 @@ SELECT T.tiempo_mes, TP.cod_tipo_paquete /*como no tenemos desc_tipo_paquete no 
 JOIN D_DE_DATOS.BI_TIEMPO T ON EM.mes_envio_mensajeria = T.tiempo_mes
 	GROUP BY T.tiempo_mes, TP.cod_tipo_paquete
 GO
--- ● Cantidad de reclamos mensuales recibidos por cada local en función del
+
+
+--VISTA 9
+-- Cantidad de reclamos mensuales recibidos por cada local en función del
 -- día de la semana y rango horario.
 -- mes | local | diaSemana | rangoHorario | cantidadReclamos
  CREATE VIEW BI_D_DE_DATOS.CANTIDAD_RECLAMOS
@@ -852,7 +868,10 @@ GO
     JOIN D_DE_DATOS.BI_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes
 	GROUP BY T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo
  GO
--- ● Tiempo promedio de resolución de reclamos mensual según cada tipo de
+
+
+ --VISTA 10
+-- Tiempo promedio de resolución de reclamos mensual según cada tipo de
 -- reclamo y rango etario de los operadores.
 -- El tiempo de resolución debe calcularse en minutos y representa la
 -- diferencia entre la fecha/hora en que se realizó el reclamo y la fecha/hora
@@ -868,7 +887,10 @@ JOIN D_DE_DATOS.BI_ENVIOS_TIPOS_RECLAMOS TR ON R.cod_tipo_reclamo = TR.cod_tipo_
 	JOIN D_DE_DATOS.BI_ENVIOS_RANGO_ETARIO RE ON O.rengo_etario = RE.cod_rango_etario
 JOIN D_DE_DATOS.BI_ENVIOS_TIEMPO T ON R.mes_inicio_reclamo = T.tiempo_mes	GROUP BY T.tiempo_mes, TR.desc_tipo_reclamo, RE.desc_rango_etario
 GO
--- ● Monto mensual generado en cupones a partir de reclamos. /*NOS FALTAN CUPONES*/
+
+
+--VISTA 11
+-- Monto mensual generado en cupones a partir de reclamos. /*NOS FALTAN CUPONES*/
 CREATE VIEW BI_D_DE_DATOS_CUPONES_RECLAMOS
 AS
 	SELECT T.tiempo_mes, SUM(C.monto_cupon) sumaMontoCupones
