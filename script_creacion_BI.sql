@@ -698,18 +698,50 @@ GO
 -- según la localidad y categoría del local
 -- para cada mes de cada año.
 
-CREATE VIEW BI_D_DE_DATOS_MAYOR_CANTIDAD_PEDIDOS
+CREATE VIEW D_DE_DATOS.MAYOR_CANTIDAD_PEDIDOS
+(Dia, Mes, Año, FranjaHoraria, Localidad, Provincia, CategoriaLocal, TipoLocal, CantidadPedidos) 
 AS
-SELECT T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local,
-(SELECT COUNT(*) FROM P) cantidadPedidos
+SELECT 
+D.desc_dia,
+T.tiempo_mes,
+T.tiempo_anio,
+R.desc_rango_horario,
+LO.nombre_localidad,
+LO.provincia_localidad,
+C.desc_categoria_local,
+TL.desc_tipo_local,
+COUNT(P.cod_pedido)
 FROM D_DE_DATOS.BI_PEDIDOS P
-	JOIN D_DE_DATOS.BI_LOCALES LO ON P.cod_local = LO.cod_local
-	JOIN D_DE_DATOS.BI_ENVIOS E ON P.cod_pedido = E.cod_pedido
-	JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
-	JOIN D_DE_DATOS.BI_CATEGORIAS_LOCALES CL ON LO.cod_categoria_local = CL.cod_categoria_local
-	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
-GROUP BY T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local
+LEFT JOIN D_DE_DATOS.BI_TIEMPO T ON P.cod_tiempo_pedido = T.cod_tiempo
+LEFT JOIN D_DE_DATOS.BI_DIAS D ON P.cod_dia_pedido = D.cod_dia
+LEFT JOIN D_DE_DATOS.BI_RANGO_HORARIO R ON P.rango_horario_pedido = R.cod_rango_horario
+LEFT JOIN D_DE_DATOS.BI_LOCALES L ON P.cod_local = L.cod_local
+LEFT JOIN D_DE_DATOS.BI_LOCALIDADES LO ON L.cod_localidad = LO.cod_localidad
+LEFT JOIN D_DE_DATOS.BI_CATEGORIAS_LOCALES C ON L.cod_categoria_local = C.cod_categoria_local
+LEFT JOIN D_DE_DATOS.BI_TIPOS_LOCALES TL ON L.cod_tipo_local = TL.cod_tipo_local
+GROUP BY
+    D.desc_dia,
+    T.tiempo_mes,
+    T.tiempo_anio,
+    R.desc_rango_horario,
+	LO.nombre_localidad,
+    LO.provincia_localidad,
+	C.desc_categoria_local,
+    TL.desc_tipo_local;
 GO
+
+--CREATE VIEW BI_D_DE_DATOS_MAYOR_CANTIDAD_PEDIDOS
+--AS
+--SELECT T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local,
+--(SELECT COUNT(*) FROM P) cantidadPedidos
+--FROM D_DE_DATOS.BI_PEDIDOS P
+--	JOIN D_DE_DATOS.BI_LOCALES LO ON P.cod_local = LO.cod_local
+--	JOIN D_DE_DATOS.BI_ENVIOS E ON P.cod_pedido = E.cod_pedido
+--	JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+--	JOIN D_DE_DATOS.BI_CATEGORIAS_LOCALES CL ON LO.cod_categoria_local = CL.cod_categoria_local
+--	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
+--GROUP BY T.tiempo_mes, L.nombre_localidad, CL.desc_categoria_local
+--GO
 
 
 
@@ -844,3 +876,4 @@ AS
  -----------------------------------------------
 
  --SELECTS DE LAS VISTAS
+SELECT * FROM D_DE_DATOS.MAYOR_CANTIDAD_PEDIDOS;
