@@ -127,6 +127,12 @@ CREATE TABLE D_DE_DATOS.BI_OPERADORES (
 	fecha_nacimiento_operador DATE NOT NULL,
 );
 
+-- Tipo Reclamo
+CREATE TABLE D_DE_DATOS.BI_TIPOS_RECLAMOS (
+	cod_tipo_reclamo INT PRIMARY KEY,
+	desc_tipo_reclamo NVARCHAR(50) NOT NULL
+);
+
 
 ----------------- OTRAS TABLAS EXTRAS ¿¿¿¿¿¿
 
@@ -218,13 +224,13 @@ CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
 
 -- Hechos envios
 CREATE TABLE D_DE_DATOS.BI_ENVIOS (
-	cod_envio INT IDENTITY(1,1) PRIMARY KEY,
-	cod_direccion_usuario INT NOT NULL,
+	cod_envio INT PRIMARY KEY,
+	--cod_direccion_usuario INT NOT NULL,
 	precio_envio DECIMAL(18,2) NOT NULL,
 	cod_repartidor INT NOT NULL,
 	cod_localidad INT NOT NULL,
 	cod_pedido DECIMAL(18,0) NOT NULL,
-	FOREIGN KEY (cod_direccion_usuario) REFERENCES D_DE_DATOS.BI_DIRECCIONES_USUARIOS,
+	--FOREIGN KEY (cod_direccion_usuario) REFERENCES D_DE_DATOS.BI_DIRECCIONES_USUARIOS,
 	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.BI_REPARTIDORES,
 	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.BI_LOCALIDADES,
 	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS
@@ -237,13 +243,11 @@ CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
 	cod_pedido DECIMAL(18,0) NOT NULL,
 	cod_tipo_reclamo INT NOT NULL,
 	desc_reclamo NVARCHAR(255) NULL,
-	dia_inicio_reclamo NVARCHAR(30),
-	mes_inicio_reclamo INT NOT NULL,
-	anio_inicio_reclamo INT NOT NULL,
+	cod_dia_inicio_reclamo INT NULL,
+	cod_tiempo_inicio_reclamo INT NOT NULL,
 	rango_horario_inicio_reclamo INT NOT NULL,
-	dia_solucion NVARCHAR(30),
-	mes_solucion INT NOT NULL,
-	anio_solucion INT NOT NULL, 
+	cod_dia_solucion INT NULL,
+	cod_tiempo_solucion INT NOT NULL,
 	rango_horario_solucion INT NOT NULL,
 	cod_operador INT NOT NULL,
 	cod_estado_reclamo INT NOT NULL,
@@ -251,7 +255,11 @@ CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
 	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS,
 	FOREIGN KEY (cod_tipo_reclamo) REFERENCES D_DE_DATOS.BI_TIPOS_RECLAMOS,
 	FOREIGN KEY (cod_operador) REFERENCES D_DE_DATOS.BI_OPERADORES,
-	FOREIGN KEY (cod_estado_reclamo) REFERENCES D_DE_DATOS.BI_ESTADOS_RECLAMOS
+	FOREIGN KEY (cod_estado_reclamo) REFERENCES D_DE_DATOS.BI_ESTADOS_RECLAMOS,
+	FOREIGN KEY (cod_dia_inicio_reclamo) REFERENCES D_DE_DATOS.BI_DIAS,
+	FOREIGN KEY (cod_dia_solucion) REFERENCES D_DE_DATOS.BI_DIAS,
+	FOREIGN KEY (cod_tiempo_inicio_reclamo) REFERENCES D_DE_DATOS.BI_TIEMPO,
+	FOREIGN KEY (cod_tiempo_solucion) REFERENCES D_DE_DATOS.BI_TIEMPO
 );
 
 -------------------------------------------------------------------------------------------
@@ -479,7 +487,8 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_PAQUETES
  AS
   BEGIN
     INSERT INTO D_DE_DATOS.BI_TIPOS_PAQUETES (cod_tipo_paquete,precio_paquete)
-		SELECT cod_tipo_paquete, precio_paquete FROM D_DE_DATOS.TIPOS_PAQUETES
+		SELECT cod_tipo_paquete, precio_paquete 
+		FROM D_DE_DATOS.TIPOS_PAQUETES
   END
 GO
 
@@ -543,6 +552,16 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_OPERADORES
   END
 GO
 
+-- Tipo Reclamo
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_RECLAMOS
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_TIPOS_RECLAMOS (cod_tipo_reclamo,desc_tipo_reclamo)
+		SELECT cod_tipo_reclamo,desc_tipo_reclamo
+		FROM D_DE_DATOS.TIPOS_RECLAMOS
+  END
+GO
+
 --FALTA MIGRAR OTRAS TABLAS EXTRAS
 
 
@@ -573,8 +592,8 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
 		  D.cod_dia,
 		  T.cod_tiempo,
 		  D_DE_DATOS.CALCULAR_RANGO_HORARIO(fecha_pedido) AS rango_horario_pedido,
-		  D.cod_dia,
-		  T.cod_tiempo,
+		  D2.cod_dia,
+		  T2.cod_tiempo,
 		  D_DE_DATOS.CALCULAR_RANGO_HORARIO(fecha_entrega_pedido) AS rango_horario_entrega,
 		  cod_local,
 		  tarifa_servicio_pedido,
@@ -584,52 +603,64 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
 		  calificacion_pedido
 		  FROM D_DE_DATOS.PEDIDOS P
 		  INNER JOIN D_DE_DATOS.BI_TIEMPO T ON T.tiempo_anio = YEAR(P.fecha_pedido) AND T.tiempo_mes = MONTH(P.fecha_pedido)
-		  INNER JOIN D_DE_DATOS.BI_DIAS D ON D.desc_dia = D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_entrega_pedido)
+		  INNER JOIN D_DE_DATOS.BI_TIEMPO T2 ON T2.tiempo_anio = YEAR(P.fecha_entrega_pedido) AND T2.tiempo_mes = MONTH(P.fecha_entrega_pedido)
+		  INNER JOIN D_DE_DATOS.BI_DIAS D ON D.desc_dia = D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_pedido)
+		  INNER JOIN D_DE_DATOS.BI_DIAS D2 ON D2.desc_dia = D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_entrega_pedido)
 		  END
 GO
 
 
 -- Envios
-
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_ENVIOS
  AS
 	BEGIN
-    INSERT INTO D_DE_DATOS.BI_ENVIOS (
-	cod_direccion_usuario,
-	precio_envio,
-	cod_repartidor,
-	cod_localidad,
-	cod_pedido)
-		SELECT E.cod_direccion_usuario, E.precio_envio, E.cod_repartidor,E.cod_localidad, E.cod_pedido
-		  FROM D_DE_DATOS.ENVIOS E
+    INSERT INTO D_DE_DATOS.BI_ENVIOS (cod_envio,precio_envio,cod_repartidor,cod_localidad,cod_pedido)
+		SELECT cod_envio, precio_envio, cod_repartidor,cod_localidad, cod_pedido
+		  FROM D_DE_DATOS.ENVIOS 
 	END
 GO
 
-
---FALTA MIGRAR
 -- Hechos reclamos - a revisar
-CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
-	cod_reclamo DECIMAL(18,0) PRIMARY KEY,
-	cod_usuario INT NOT NULL,
-	cod_pedido DECIMAL(18,0) NOT NULL,
-	cod_tipo_reclamo INT NOT NULL,
-	desc_reclamo NVARCHAR(255) NULL,
-	dia_inicio_reclamo NVARCHAR(30),
-	mes_inicio_reclamo INT NOT NULL,
-	anio_inicio_reclamo INT NOT NULL,
-	rango_horario_inicio_reclamo INT NOT NULL,
-	dia_solucion NVARCHAR(30),
-	mes_solucion INT NOT NULL,
-	anio_solucion INT NOT NULL, 
-	rango_horario_solucion INT NOT NULL,
-	cod_operador INT NOT NULL,
-	cod_estado_reclamo INT NOT NULL,
-	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.BI_USUARIOS,
-	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.BI_PEDIDOS,
-	FOREIGN KEY (cod_tipo_reclamo) REFERENCES D_DE_DATOS.BI_TIPOS_RECLAMOS,
-	FOREIGN KEY (cod_operador) REFERENCES D_DE_DATOS.BI_OPERADORES,
-	FOREIGN KEY (cod_estado_reclamo) REFERENCES D_DE_DATOS.BI_ESTADOS_RECLAMOS
-);
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_RECLAMOS
+ AS
+  BEGIN
+    INSERT INTO D_DE_DATOS.BI_RECLAMOS
+	(cod_reclamo,
+	cod_usuario,
+	cod_pedido,
+	cod_tipo_reclamo,
+	desc_reclamo,
+	cod_dia_inicio_reclamo,
+	cod_tiempo_inicio_reclamo,
+	rango_horario_inicio_reclamo,
+	cod_dia_solucion,
+	cod_tiempo_solucion,
+	rango_horario_solucion,
+	cod_operador,
+	cod_estado_reclamo
+	)
+		SELECT 
+		  cod_reclamo,
+		  cod_usuario,
+		  cod_pedido,
+		  cod_tipo_reclamo,
+		  desc_reclamo,
+		  D.cod_dia,
+		  T.cod_tiempo,
+		  D_DE_DATOS.CALCULAR_RANGO_HORARIO(fecha_reclamo) AS rango_horario_inicio_reclamo,
+		  D2.cod_dia,
+		  T2.cod_tiempo,
+		  D_DE_DATOS.CALCULAR_RANGO_HORARIO(fecha_solucion_reclamo) AS rango_horario_solucion,
+		  cod_operador,
+		  cod_estado_reclamo
+		  FROM D_DE_DATOS.RECLAMOS R
+		  INNER JOIN D_DE_DATOS.BI_TIEMPO T ON T.tiempo_anio = YEAR(R.fecha_reclamo) AND T.tiempo_mes = MONTH(R.fecha_reclamo)
+		  INNER JOIN D_DE_DATOS.BI_TIEMPO T2 ON T2.tiempo_anio = YEAR(R.fecha_solucion_reclamo) AND T2.tiempo_mes = MONTH(R.fecha_solucion_reclamo)
+		  INNER JOIN D_DE_DATOS.BI_DIAS D ON D.desc_dia = D_DE_DATOS.CALCULAR_DIA_SEMANA(R.fecha_reclamo)
+		  INNER JOIN D_DE_DATOS.BI_DIAS D2 ON D2.desc_dia = D_DE_DATOS.CALCULAR_DIA_SEMANA(R.fecha_solucion_reclamo)
+		  END
+GO
+
 
 
 ---------------------------------------------------------------------------------
