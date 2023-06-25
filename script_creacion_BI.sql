@@ -843,7 +843,7 @@ SELECT
     L.nombre_local AS NombreLocal,
 	COUNT(P.cod_pedido) AS PedidosCancelados, 
     SUM(P.total_pedido) AS MontoTotal
-FROM D_DE_DATOS.BI_PEDIDOS2 P
+FROM D_DE_DATOS.BI_PEDIDOS P
 INNER JOIN D_DE_DATOS.BI_DIAS D ON P.cod_dia_pedido = D.cod_dia
 INNER JOIN D_DE_DATOS.BI_RANGO_HORARIO R ON P.rango_horario_pedido = R.cod_rango_horario
 INNER JOIN D_DE_DATOS.BI_LOCALES L ON P.cod_local = L.cod_local
@@ -866,7 +866,7 @@ GO
     SELECT 
 	T.tiempo_mes AS Mes, 
 	L.nombre_localidad AS Localidad,
-    (  SUM(E.precio_envio) / (COUNT(*))  ) AS promedioPrecioEnvios
+	AVG(precio_envio) AS ValorPromedioEnvios
     FROM D_DE_DATOS.BI_ENVIOS E
     JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
     JOIN D_DE_DATOS.BI_PEDIDOS P ON E.cod_pedido = P.cod_pedido
@@ -921,7 +921,7 @@ AS
 	SELECT 
 	T.tiempo_mes AS Mes, 
 	L.nombre_local AS NombreLocal,
-	(SUM(P.calificacion_pedido) / (COUNT(*)) ) promedioCalificaciones
+	AVG(calificacion_pedido) AS PromedioCalificacion
 	FROM D_DE_DATOS.BI_PEDIDOS P
 	JOIN D_DE_DATOS.BI_TIEMPO T ON P.cod_tiempo_pedido = T.cod_tiempo
 	JOIN D_DE_DATOS.BI_LOCALES L ON P.cod_local = L.cod_local
@@ -940,19 +940,46 @@ GO
 -- como los de mensajería.
 
 -- El porcentaje se calcula en función del total general de pedidos y envíos
--- mensuales entregados. /*HECHO SOLO PARA PEDIDOS*/
+-- mensuales entregados. 
 
-CREATE VIEW BI_D_DE_DATOS_PORCENTAJE_PEDIDOS_Y_ENVIOS_ENTREGADOS
+CREATE VIEW D_DE_DATOS.PORCENTAJE_PEDIDOS_Y_ENVIOS_ENTREGADOS
 AS
-	SELECT T.tiempo_mes, L.desc_localidad, RE.desc_rango_etario,
-	(SELECT COUNT(*) FROM P WHERE dia_entrega IS NOT NULL /*pedidos entregados*/) / (SELECT COUNT(*) FROM P /*pedidos totales*/) porcentaje
+	SELECT 
+	T.tiempo_mes AS Mes, 
+	L.nombre_localidad AS Localidad,
+	RE.desc_rango_etario AS RangoEtario,
+	COUNT(*) AS totalPedidosServicios,
+	COUNT(CASE WHEN cod_estado_pedido = 1 THEN 1 END) AS entregasRealizadas,
+	100 * COUNT(CASE WHEN cod_estado_pedido = 1 THEN 1 END) / COUNT(*) AS PorcentajeEntregados
 	FROM D_DE_DATOS.BI_PEDIDOS P
-	JOIN D_DE_DATOS.BI_ENVIO E ON P.cod_pedido = E.cod_envio
+	JOIN D_DE_DATOS.BI_ENVIOS E ON E.cod_pedido = P.cod_pedido
 	JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
-	JOIN D_DE_DATOS.BI_REPARTIDORES R ON E.cod_repartidor = R.cod_repartidor
+	JOIN D_DE_DATOS.BI_REPARTIDORES R ON R.cod_repartidor = E.cod_repartidor
 	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON R.rango_etario = RE.cod_rango_etario
-	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
-	GROUP BY T.tiempo_mes, L.desc_localidad, RE.desc_rango_etario
+	JOIN D_DE_DATOS.BI_TIEMPO T ON P.cod_tiempo_entrega = T.cod_tiempo
+	GROUP BY  
+	T.tiempo_mes, 
+	L.nombre_localidad,
+	RE.desc_rango_etario
+
+	UNION
+
+	SELECT 
+	T.tiempo_mes AS Mes, 
+	L.nombre_localidad AS Localidad,
+	RE.desc_rango_etario AS RangoEtario,
+	COUNT(*) AS totalPedidosServicios,
+	COUNT(CASE WHEN cod_tiempo_entrega_mensajeria IS NOT NULL THEN 1 END) AS entregasRealizadas,
+	100 * COUNT(CASE WHEN cod_tiempo_entrega_mensajeria IS NOT NULL THEN 1 END) / COUNT(*) AS PorcentajeEntregados
+	FROM D_DE_DATOS.BI_SERVICIOS_MENSAJERIA M
+	JOIN D_DE_DATOS.BI_TIEMPO T ON M.cod_tiempo_entrega_mensajeria = T.cod_tiempo
+	JOIN D_DE_DATOS.BI_LOCALIDADES L ON M.cod_localidad = L.cod_localidad
+	JOIN D_DE_DATOS.BI_REPARTIDORES R ON M.cod_repartidor = R.cod_repartidor
+	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON R.rango_etario = RE.cod_rango_etario
+	GROUP BY  
+	T.tiempo_mes, 
+	L.nombre_localidad,
+	RE.desc_rango_etario
 GO
 
 -------------------------------------------------------
