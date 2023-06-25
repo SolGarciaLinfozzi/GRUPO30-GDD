@@ -855,16 +855,23 @@ GROUP BY
 
 --VISTA 5
 -- Monto total de los cupones utilizados por mes en función del rango etario
--- de los usuarios. /*NOS FALTAN CUPONES*/
+-- de los usuarios. 
 
 CREATE VIEW BI_D_DE_DATOS_MONTO_TOTAL_CUPONES
 AS
-	SELECT T.tiempo_mes, RE.desc_rango_etario, SUM(C.monto_cupon) sumaMontoCupones
-	FROM D_DE_DATOS.BI_USUARIOS U
-	JOIN D_DE_DATOS.BI_CUPONES C ON U.cod_usuario = C.cod_usuario
+	SELECT 
+	T.tiempo_mes AS Mes, 
+	RE.desc_rango_etario AS RangoEtario, 
+	SUM(C.monto_cupon) montoTotalCupones
+	FROM D_DE_DATOS.BI_PEDIDOS_CUPON PC
+	JOIN D_DE_DATOS.BI_PEDIDOS2 P ON PC.cod_pedido = P.cod_pedido
+	JOIN D_DE_DATOS.BI_CUPONES_DESCUENTO C ON PC.cod_cupon = C.cod_cupon
+	JOIN D_DE_DATOS.BI_TIEMPO T ON P.cod_tiempo_pedido = T.cod_tiempo
+	JOIN D_DE_DATOS.BI_USUARIOS U ON P.cod_usuario = U.cod_usuario
 	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON U.rango_etario = RE.cod_rango_etario
-	JOIN D_DE_DATOS.BI_TIEMPO T ON C.mes_alta_cupon = T.tiempo_mes
-	GROUP BY T.tiempo_mes, RE.desc_rango_etario
+	GROUP BY 
+	T.tiempo_mes, 
+	RE.desc_rango_etario
 GO
 
 -------------------------------------------------------
