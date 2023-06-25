@@ -778,34 +778,23 @@ GROUP BY
 	L.direccion_local
 
 
---CREATE VIEW BI_D_DE_DATOS_MONTO_NO_COBRADO
---AS
---	SELECT D.desc_dia, R.desc_rango_horario, L.nombre_local,
---	(SELECT SUM(total_pedido) FROM P WHERE dia_entrega IS NULL) totalPedidosEnregados
---	FROM D_DE_DATOS.BI_PEDIDOS P
---	JOIN D_DE_DATOS.BI_DIAS D ON P.dia_pedido = D.desc_dia
---	JOIN D_DE_DATOS.BI_LOCALES L ON P.cod_local = L.cod_local
---	JOIN D_DE_DATOS.BI_RANGO_HORARIO R ON P.rango_horario_pedido = R.desc_rango_horario
---	GROUP BY D.desc_dia, R.desc_rango_horario, L.nombre_local
---GO
-
-
-
-
 --VISTA 3
 -- Valor promedio mensual que tienen los envíos de pedidos en cada
 -- localidad.
 -- mes | localidad | promedioPrecioEnvios
- CREATE VIEW BI_D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD
+ CREATE VIEW D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD
  AS  
-    SELECT T.tiempo_mes, L.nombre_localidad,
-    (SUM(E.precio_envio) / (SELECT COUNT(*) FROM E)) promedioPrecioEnvios
-
-     FROM D_DE_DATOS.BI_ENVIOS E
-     JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
-     JOIN D_DE_DATOS.BI_PEDIDOS P ON E.cod_pedido = P.cod_pedido
-     JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_entrega = T.tiempo_mes
-	 GROUP BY T.tiempo_mes, L.nombre_localidad
+    SELECT 
+	T.tiempo_mes AS Mes, 
+	L.nombre_localidad AS Localidad,
+    (  SUM(E.precio_envio) / (COUNT(*))  ) AS promedioPrecioEnvios
+    FROM D_DE_DATOS.BI_ENVIOS E
+    JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+    JOIN D_DE_DATOS.BI_PEDIDOS P ON E.cod_pedido = P.cod_pedido
+    JOIN D_DE_DATOS.BI_TIEMPO T ON P.cod_tiempo_entrega = T.cod_tiempo
+	GROUP BY 
+	T.tiempo_mes, 
+	L.nombre_localidad
  GO
 
 --VISTA 4
@@ -838,8 +827,8 @@ CREATE VIEW BI_D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
      SELECT T.tiempo_mes, L.desc_local, 
      (SUM(P.calificacion_pedido) / (SELECT COUNT(*) FROM P)) promedioCalificaciones
 
-     FROM D_DE_DATOS.BI_LOCALES L
-     JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
+    FROM D_DE_DATOS.BI_LOCALES L
+    JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
     JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
     GROUP BY T.tiempo_mes, L.desc_local
  GO
