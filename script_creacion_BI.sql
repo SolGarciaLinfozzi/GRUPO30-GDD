@@ -776,7 +776,7 @@ GROUP BY
     TL.desc_tipo_local
 ORDER BY
     ROW_NUMBER() OVER (PARTITION BY T.tiempo_mes, T.tiempo_anio ORDER BY COUNT(P.cod_pedido) DESC);
-
+GO
 
 --CREATE VIEW BI_D_DE_DATOS_MAYOR_CANTIDAD_PEDIDOS
 --AS
@@ -804,7 +804,6 @@ SELECT
 	D.desc_dia AS Dia,
 	R.desc_rango_horario AS FranjaHoraria,
     L.nombre_local AS NombreLocal,
-    L.direccion_local AS DireccionLocal,
 	COUNT(P.cod_pedido) AS PedidosCancelados, 
     SUM(P.total_pedido) AS MontoTotal
 FROM D_DE_DATOS.BI_PEDIDOS2 P
@@ -815,8 +814,8 @@ WHERE P.cod_estado_pedido = 2
 GROUP BY
     D.desc_dia,
     R.desc_rango_horario,
-    L.nombre_local,
-	L.direccion_local
+    L.nombre_local
+GO
 
 -------------------------------------------------------
 
