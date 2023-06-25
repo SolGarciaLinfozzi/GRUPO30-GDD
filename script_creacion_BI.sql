@@ -226,7 +226,8 @@ CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
 CREATE TABLE D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (
 	cod_mensajeria INT PRIMARY KEY,
 	cod_usuario INT NOT NULL,
-	fecha_mensajeria DATETIME2(3) NOT NULL,
+	cod_dia_mensajeria INT NULL,
+	cod_tiempo_mensajeria INT NOT NULL,
 	direccion_origen_mensajeria NVARCHAR(255) NOT NULL,
 	direccion_destino_mensajeria NVARCHAR(255) NOT NULL,
 	cod_localidad INT NOT NULL,
@@ -242,14 +243,19 @@ CREATE TABLE D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (
 	total_mensajeria  DECIMAL(18,2) NOT NULL,
 	cod_estado_mensajeria INT NOT NULL,
 	tiempo_entrega_estimado_mensajeria  DECIMAL(18,2) NOT NULL,
-	fecha_entrega_mensajeria DATETIME2(3) NULL,
+	cod_dia_entrega_mensajeria INT NULL,
+	cod_tiempo_entrega_mensajeria INT NOT NULL,
 	calificacion_mensajeria DECIMAL(18,2) NULL
 	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
 	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades,
 	FOREIGN KEY (cod_tipo_paquete) REFERENCES D_DE_DATOS.tipos_paquetes,
 	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.repartidores,
 	FOREIGN KEY (cod_medio_pago) REFERENCES D_DE_DATOS.medios_pago,
-	FOREIGN KEY (cod_estado_mensajeria) REFERENCES D_DE_DATOS.estados_mensajeria
+	FOREIGN KEY (cod_estado_mensajeria) REFERENCES D_DE_DATOS.estados_mensajeria,
+	FOREIGN KEY (cod_dia_mensajeria) REFERENCES D_DE_DATOS.BI_DIAS,
+	FOREIGN KEY (cod_dia_entrega_mensajeria) REFERENCES D_DE_DATOS.BI_DIAS,
+	FOREIGN KEY (cod_tiempo_mensajeria) REFERENCES D_DE_DATOS.BI_TIEMPO,
+	FOREIGN KEY (cod_tiempo_entrega_mensajeria) REFERENCES D_DE_DATOS.BI_TIEMPO
 );
 
 --Hechos cupones - a revisar
@@ -258,8 +264,6 @@ CREATE TABLE D_DE_DATOS.BI_CUPONES_DESCUENTO (
 	cod_cupon_anterior INT NULL,
 	cod_usuario INT NOT NULL,
 	monto_cupon DECIMAL (18,2) NOT NULL,
-	fecha_alta_cupon DATETIME2(3) NOT NULL,
-	fecha_vencimiento_cupon DATETIME2(3) NOT NULL,
 	cod_tipo_cupon INT NOT NULL,
 	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
 	FOREIGN KEY (cod_tipo_cupon) REFERENCES D_DE_DATOS.tipos_cupones
@@ -691,8 +695,8 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_CUPONES_DESCUENTO
 AS
 BEGIN
-	INSERT INTO D_DE_DATOS.BI_CUPONES_DESCUENTO(cod_cupon,cod_cupon_anterior,cod_usuario,monto_cupon,fecha_alta_cupon,fecha_vencimiento_cupon,cod_tipo_cupon)
-	SELECT cod_cupon,cod_cupon_anterior,cod_usuario,monto_cupon,fecha_alta_cupon,fecha_vencimiento_cupon,cod_tipo_cupon
+	INSERT INTO D_DE_DATOS.BI_CUPONES_DESCUENTO(cod_cupon,cod_cupon_anterior,cod_usuario,monto_cupon,cod_tipo_cupon)
+	SELECT cod_cupon,cod_cupon_anterior,cod_usuario,monto_cupon,cod_tipo_cupon
 	FROM D_DE_DATOS.CUPONES_DESCUENTO
 END
 GO
@@ -710,9 +714,34 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_SERVICIOS_MENSAJERIA
 AS
 BEGIN
-	INSERT INTO D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (cod_mensajeria,cod_usuario,fecha_mensajeria , direccion_origen_mensajeria , direccion_destino_mensajeria ,cod_localidad, km_mensajeria ,cod_tipo_paquete, valor_asegurado_mensajeria , observaciones_mensajeria , precio_envio_mensajeria  , precio_seguro_mensajeria  ,cod_repartidor, propina_mensajeria,cod_medio_pago, total_mensajeria  , cod_estado_mensajeria, tiempo_entrega_estimado_mensajeria  , fecha_entrega_mensajeria ,calificacion_mensajeria  )
-	SELECT cod_mensajeria,cod_usuario,fecha_mensajeria , direccion_origen_mensajeria , direccion_destino_mensajeria ,cod_localidad, km_mensajeria ,cod_tipo_paquete, valor_asegurado_mensajeria , observaciones_mensajeria , precio_envio_mensajeria  , precio_seguro_mensajeria  ,cod_repartidor, propina_mensajeria,cod_medio_pago, total_mensajeria  , cod_estado_mensajeria, tiempo_entrega_estimado_mensajeria  , fecha_entrega_mensajeria ,calificacion_mensajeria 
+	INSERT INTO D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (cod_mensajeria,cod_usuario,cod_dia_mensajeria ,cod_tiempo_mensajeria, direccion_origen_mensajeria , direccion_destino_mensajeria ,cod_localidad, km_mensajeria ,cod_tipo_paquete, valor_asegurado_mensajeria , observaciones_mensajeria , precio_envio_mensajeria  , precio_seguro_mensajeria  ,cod_repartidor, propina_mensajeria,cod_medio_pago, total_mensajeria  , cod_estado_mensajeria, tiempo_entrega_estimado_mensajeria  , cod_dia_entrega_mensajeria,cod_tiempo_entrega_mensajeria ,calificacion_mensajeria  )
+	SELECT 
+	cod_mensajeria,
+	cod_usuario,
+	D.cod_dia,
+	T.cod_tiempo,
+	direccion_origen_mensajeria , 
+	direccion_destino_mensajeria ,
+	cod_localidad, km_mensajeria ,
+	cod_tipo_paquete, 
+	valor_asegurado_mensajeria , 
+	observaciones_mensajeria , 
+	precio_envio_mensajeria  , 
+	precio_seguro_mensajeria  ,
+	cod_repartidor, 
+	propina_mensajeria,
+	cod_medio_pago, 
+	total_mensajeria  , 
+	cod_estado_mensajeria,
+	tiempo_entrega_estimado_mensajeria  , 
+	D2.cod_dia,
+	T2.cod_tiempo,
+	calificacion_mensajeria 
 	FROM D_DE_DATOS.SERVICIOS_MENSAJERIA
+	INNER JOIN D_DE_DATOS.BI_TIEMPO T ON T.tiempo_anio = YEAR(fecha_mensajeria) AND T.tiempo_mes = MONTH(fecha_mensajeria)
+	INNER JOIN D_DE_DATOS.BI_TIEMPO T2 ON T2.tiempo_anio = YEAR(fecha_entrega_mensajeria) AND T2.tiempo_mes = MONTH(fecha_entrega_mensajeria)
+	INNER JOIN D_DE_DATOS.BI_DIAS D ON D.desc_dia = D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_mensajeria)
+	INNER JOIN D_DE_DATOS.BI_DIAS D2 ON D2.desc_dia = D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_entrega_mensajeria)
 END
 GO
 
@@ -919,7 +948,7 @@ AS
 	(SELECT COUNT(*) FROM P WHERE dia_entrega IS NOT NULL /*pedidos entregados*/) / (SELECT COUNT(*) FROM P /*pedidos totales*/) porcentaje
 	FROM D_DE_DATOS.BI_PEDIDOS P
 	JOIN D_DE_DATOS.BI_ENVIO E ON P.cod_pedido = E.cod_envio
-JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
+	JOIN D_DE_DATOS.BI_LOCALIDADES L ON E.cod_localidad = L.cod_localidad
 	JOIN D_DE_DATOS.BI_REPARTIDORES R ON E.cod_repartidor = R.cod_repartidor
 	JOIN D_DE_DATOS.BI_RANGO_ETARIO RE ON R.rango_etario = RE.cod_rango_etario
 	JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
@@ -1006,3 +1035,5 @@ SELECT * FROM D_DE_DATOS.MONTO_NO_COBRADO_LOCALES;
 SELECT * FROM D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD;
 --falta vista 4
 SELECT * FROM D_DE_DATOS.MONTO_TOTAL_CUPONES;
+SELECT * FROM D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL;
+
