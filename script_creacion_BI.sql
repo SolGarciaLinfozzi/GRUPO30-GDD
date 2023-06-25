@@ -80,8 +80,10 @@ CREATE TABLE D_DE_DATOS.BI_TIPOS_MOVILIDAD (
 -- Tipo Paquete
 CREATE TABLE D_DE_DATOS.BI_TIPOS_PAQUETES (
 	cod_tipo_paquete INT  PRIMARY KEY,
-	precio_paquete DECIMAL(18,2) NOT NULL,
+	desc_tipo_paquete NVARCHAR(50) NOT NULL,
+	precio_paquete DECIMAL(18,2) NOT NULL
 );
+
 
 -- Estados pedidos
 CREATE TABLE D_DE_DATOS.BI_ESTADOS_PEDIDOS (
@@ -499,8 +501,8 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_PAQUETES
  AS
   BEGIN
-    INSERT INTO D_DE_DATOS.BI_TIPOS_PAQUETES (cod_tipo_paquete,precio_paquete)
-		SELECT cod_tipo_paquete, precio_paquete 
+    INSERT INTO D_DE_DATOS.BI_TIPOS_PAQUETES (cod_tipo_paquete,desc_tipo_paquete,precio_paquete)
+		SELECT cod_tipo_paquete,desc_tipo_paquete,precio_paquete
 		FROM D_DE_DATOS.TIPOS_PAQUETES
   END
 GO
@@ -985,19 +987,21 @@ GO
 -------------------------------------------------------
 
 --VISTA 8
--- Promedio mensual del valor asegurado (valor declarado por el usuario) de
--- los paquetes enviados a través del servicio de mensajería en función del
--- tipo de paquete. /*NOS FALTA ENVIO MENSAJERIA, LO HAGO COMO SI LO TUVIERAMOS */
+-- Promedio mensual del valor asegurado (valor declarado por el usuario) de los paquetes enviados
+-- a través del servicio de mensajería en función del tipo de paquete. 
 
-CREATE VIEW BI_D_DE_DATOS_PROMEDIO_VALOR_ASEGURADO
+CREATE VIEW BI_D_DE_DATOS_PROMEDIO_VALOR_ASEGURADO2
 AS
-SELECT T.tiempo_mes, TP.cod_tipo_paquete /*como no tenemos desc_tipo_paquete no sabia si iba esto
-	o el precio*/, 
-	((SELECT SUM(valor_asegurado_mensajeria) FROM EM) / (SELECT COUNT(*) FROM EM)) promedio
-	FROM D_DE_DATOS.BI_ENVIOS_MENSAJERIA EM
-	JOIN D_DE_DATOS.BI_TIPOS_PAQUETES TP ON EM.cod_tipo_paquete = TP.cod_tipo_paquete
-JOIN D_DE_DATOS.BI_TIEMPO T ON EM.mes_envio_mensajeria = T.tiempo_mes
-	GROUP BY T.tiempo_mes, TP.cod_tipo_paquete
+SELECT 
+	T.tiempo_mes AS Mes,
+	TP.desc_tipo_paquete AS TipoPaquete,
+	AVG(valor_asegurado_mensajeria) AS promedioValorAsegurado
+	FROM D_DE_DATOS.BI_SERVICIOS_MENSAJERIA M
+	JOIN D_DE_DATOS.BI_TIPOS_PAQUETES TP ON M.cod_tipo_paquete = TP.cod_tipo_paquete
+	JOIN D_DE_DATOS.BI_TIEMPO T ON M.cod_tiempo_mensajeria = T.cod_tiempo
+	GROUP BY 
+	T.tiempo_mes,
+	TP.desc_tipo_paquete
 GO
 
 -------------------------------------------------------
