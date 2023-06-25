@@ -879,16 +879,19 @@ GO
 -- Promedio de calificación mensual por local.
 -- mes | local | promedio calificacion
 
-CREATE VIEW BI_D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
- AS
-     SELECT T.tiempo_mes, L.desc_local, 
-     (SUM(P.calificacion_pedido) / (SELECT COUNT(*) FROM P)) promedioCalificaciones
-
-    FROM D_DE_DATOS.BI_LOCALES L
-    JOIN D_DE_DATOS.BI_PEDIDOS P ON L.cod_local = P.cod_local
-    JOIN D_DE_DATOS.BI_TIEMPO T ON P.mes_pedido = T.tiempo_mes
-    GROUP BY T.tiempo_mes, L.desc_local
- GO
+CREATE VIEW D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL
+AS
+	SELECT 
+	T.tiempo_mes AS Mes, 
+	L.nombre_local AS NombreLocal,
+	(SUM(P.calificacion_pedido) / (COUNT(*)) ) promedioCalificaciones
+	FROM D_DE_DATOS.BI_PEDIDOS P
+	JOIN D_DE_DATOS.BI_TIEMPO T ON P.cod_tiempo_pedido = T.cod_tiempo
+	JOIN D_DE_DATOS.BI_LOCALES L ON P.cod_local = L.cod_local
+	GROUP BY 
+	T.tiempo_mes, 
+	L.nombre_local
+GO
 
  -------------------------------------------------------
 
