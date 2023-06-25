@@ -789,25 +789,8 @@ GROUP BY
 --	GROUP BY D.desc_dia, R.desc_rango_horario, L.nombre_local
 --GO
 
-CREATE VIEW D_DE_DATOS.MONTO_NO_COBRADO_LOCALES
-AS
-SELECT 
-	D.desc_dia AS Dia,
-	R.desc_rango_horario AS FranjaHoraria,
-    L.nombre_local AS NombreLocal,
-    L.direccion_local AS DireccionLocal,
-	COUNT(P.cod_pedido) AS PedidosCancelados, 
-    SUM(P.total_pedido) AS MontoTotal
-FROM D_DE_DATOS.BI_PEDIDOS2 P
-INNER JOIN D_DE_DATOS.BI_DIAS D ON P.cod_dia_pedido = D.cod_dia
-INNER JOIN D_DE_DATOS.BI_RANGO_HORARIO R ON P.rango_horario_pedido = R.cod_rango_horario
-INNER JOIN D_DE_DATOS.BI_LOCALES L ON P.cod_local = L.cod_local
-WHERE P.cod_estado_pedido = 2
-GROUP BY
-    D.desc_dia,
-    R.desc_rango_horario,
-    L.nombre_local,
-	L.direccion_local
+
+
 
 --VISTA 3
 -- Valor promedio mensual que tienen los envíos de pedidos en cada
