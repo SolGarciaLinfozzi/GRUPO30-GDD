@@ -134,38 +134,13 @@ CREATE TABLE D_DE_DATOS.BI_TIPOS_RECLAMOS (
 );
 
 
------------------ OTRAS TABLAS EXTRAS 
-
--- Cupones
+-- Tipos cupon - a revisar
 CREATE TABLE D_DE_DATOS.BI_TIPOS_CUPON (
 	cod_tipo_cupon INT  PRIMARY KEY,
 	desc_tipo_cupon NVARCHAR(255) NOT NULL
 );
 
-CREATE TABLE D_DE_DATOS.BI_CUPONES_DESCUENTO (
-	cod_cupon INT  PRIMARY KEY,
-	cod_cupon_anterior INT NULL,
-	cod_usuario INT NOT NULL,
-	monto_cupon DECIMAL (18,2) NOT NULL,
-	fecha_alta_cupon DATETIME2(3) NOT NULL,
-	fecha_vencimiento_cupon DATETIME2(3) NOT NULL,
-	cod_tipo_cupon INT NOT NULL,
-	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
-	FOREIGN KEY (cod_tipo_cupon) REFERENCES D_DE_DATOS.tipos_cupones
-);
-
-CREATE TABLE D_DE_DATOS.BI_PEDIDOS_CUPON (
-	cod_pedido DECIMAL(18,0) NOT NULL,
-	cod_cupon INT NOT NULL,
-	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.pedidos,
-	FOREIGN KEY (cod_cupon) REFERENCES D_DE_DATOS.cupones_descuento,
-	PRIMARY KEY (cod_pedido, cod_cupon)
-);
-
-
-
---Envios_mensajería
-
+-- Medios Pago - a revisar
 CREATE TABLE D_DE_DATOS.BI_MEDIOS_PAGO (
 	cod_medio_pago INT PRIMARY KEY,
 	cod_usuario INT NOT NULL,
@@ -176,35 +151,6 @@ CREATE TABLE D_DE_DATOS.BI_MEDIOS_PAGO (
 	FOREIGN KEY (cod_tipo_medio_pago) REFERENCES D_DE_DATOS.tipos_medios_pago
 );
 
-
-CREATE TABLE D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (
-	cod_mensajeria INT PRIMARY KEY,
-	cod_usuario INT NOT NULL,
-	fecha_mensajeria DATETIME2(3) NOT NULL,
-	direccion_origen_mensajeria NVARCHAR(255) NOT NULL,
-	direccion_destino_mensajeria NVARCHAR(255) NOT NULL,
-	cod_localidad INT NOT NULL,
-	km_mensajeria DECIMAL(18,2) NOT NULL,
-	cod_tipo_paquete INT NOT NULL,
-	valor_asegurado_mensajeria DECIMAL(18,2) NOT NULL,
-	observaciones_mensajeria NVARCHAR(255) NULL,
-	precio_envio_mensajeria  DECIMAL(18,2) NOT NULL,
-	precio_seguro_mensajeria  DECIMAL(18,2) NOT NULL,
-	cod_repartidor INT NOT NULL,
-	propina_mensajeria  DECIMAL(18,2) NULL,
-	cod_medio_pago INT NOT NULL,
-	total_mensajeria  DECIMAL(18,2) NOT NULL,
-	cod_estado_mensajeria INT NOT NULL,
-	tiempo_entrega_estimado_mensajeria  DECIMAL(18,2) NOT NULL,
-	fecha_entrega_mensajeria DATETIME2(3) NULL,
-	calificacion_mensajeria DECIMAL(18,2) NULL
-	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
-	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades,
-	FOREIGN KEY (cod_tipo_paquete) REFERENCES D_DE_DATOS.tipos_paquetes,
-	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.repartidores,
-	FOREIGN KEY (cod_medio_pago) REFERENCES D_DE_DATOS.medios_pago,
-	FOREIGN KEY (cod_estado_mensajeria) REFERENCES D_DE_DATOS.estados_mensajeria
-);
 
 --------------------------------------------------------------------------------------
 
@@ -272,6 +218,57 @@ CREATE TABLE D_DE_DATOS.BI_RECLAMOS (
 	FOREIGN KEY (cod_dia_solucion) REFERENCES D_DE_DATOS.BI_DIAS,
 	FOREIGN KEY (cod_tiempo_inicio_reclamo) REFERENCES D_DE_DATOS.BI_TIEMPO,
 	FOREIGN KEY (cod_tiempo_solucion) REFERENCES D_DE_DATOS.BI_TIEMPO
+);
+
+--Hechos servicios de mensajería - a revisar
+CREATE TABLE D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (
+	cod_mensajeria INT PRIMARY KEY,
+	cod_usuario INT NOT NULL,
+	fecha_mensajeria DATETIME2(3) NOT NULL,
+	direccion_origen_mensajeria NVARCHAR(255) NOT NULL,
+	direccion_destino_mensajeria NVARCHAR(255) NOT NULL,
+	cod_localidad INT NOT NULL,
+	km_mensajeria DECIMAL(18,2) NOT NULL,
+	cod_tipo_paquete INT NOT NULL,
+	valor_asegurado_mensajeria DECIMAL(18,2) NOT NULL,
+	observaciones_mensajeria NVARCHAR(255) NULL,
+	precio_envio_mensajeria  DECIMAL(18,2) NOT NULL,
+	precio_seguro_mensajeria  DECIMAL(18,2) NOT NULL,
+	cod_repartidor INT NOT NULL,
+	propina_mensajeria  DECIMAL(18,2) NULL,
+	cod_medio_pago INT NOT NULL,
+	total_mensajeria  DECIMAL(18,2) NOT NULL,
+	cod_estado_mensajeria INT NOT NULL,
+	tiempo_entrega_estimado_mensajeria  DECIMAL(18,2) NOT NULL,
+	fecha_entrega_mensajeria DATETIME2(3) NULL,
+	calificacion_mensajeria DECIMAL(18,2) NULL
+	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
+	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades,
+	FOREIGN KEY (cod_tipo_paquete) REFERENCES D_DE_DATOS.tipos_paquetes,
+	FOREIGN KEY (cod_repartidor) REFERENCES D_DE_DATOS.repartidores,
+	FOREIGN KEY (cod_medio_pago) REFERENCES D_DE_DATOS.medios_pago,
+	FOREIGN KEY (cod_estado_mensajeria) REFERENCES D_DE_DATOS.estados_mensajeria
+);
+
+--Hechos cupones - a revisar
+CREATE TABLE D_DE_DATOS.BI_CUPONES_DESCUENTO (
+	cod_cupon INT  PRIMARY KEY,
+	cod_cupon_anterior INT NULL,
+	cod_usuario INT NOT NULL,
+	monto_cupon DECIMAL (18,2) NOT NULL,
+	fecha_alta_cupon DATETIME2(3) NOT NULL,
+	fecha_vencimiento_cupon DATETIME2(3) NOT NULL,
+	cod_tipo_cupon INT NOT NULL,
+	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
+	FOREIGN KEY (cod_tipo_cupon) REFERENCES D_DE_DATOS.tipos_cupones
+);
+
+CREATE TABLE D_DE_DATOS.BI_PEDIDOS_CUPON (
+	cod_pedido DECIMAL(18,0) NOT NULL,
+	cod_cupon INT NOT NULL,
+	FOREIGN KEY (cod_pedido) REFERENCES D_DE_DATOS.pedidos,
+	FOREIGN KEY (cod_cupon) REFERENCES D_DE_DATOS.cupones_descuento,
+	PRIMARY KEY (cod_pedido, cod_cupon)
 );
 
 -------------------------------------------------------------------------------------------
@@ -576,7 +573,6 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_RECLAMOS
   END
 GO
 
---MIGRACIÓN OTRAS TABLAS EXTRAS
 --Tipos Cupones
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_TIPOS_CUPONES
 AS
@@ -586,26 +582,6 @@ BEGIN
 	FROM D_DE_DATOS.TIPOS_CUPONES
 END
 GO
-
---Cupones
-CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_CUPONES_DESCUENTO
-AS
-BEGIN
-	INSERT INTO D_DE_DATOS.BI_CUPONES_DESCUENTO(cod_cupon,cod_cupon_anterior,cod_usuario,monto_cupon,fecha_alta_cupon,fecha_vencimiento_cupon,cod_tipo_cupon)
-	SELECT cod_cupon,cod_cupon_anterior,cod_usuario,monto_cupon,fecha_alta_cupon,fecha_vencimiento_cupon,cod_tipo_cupon
-	FROM D_DE_DATOS.CUPONES_DESCUENTO
-END
-GO
-
-CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS_CUPON
-AS
-BEGIN
-	INSERT INTO D_DE_DATOS.BI_PEDIDOS_CUPON(cod_pedido,cod_cupon)
-	SELECT cod_pedido,cod_cupon
-	FROM D_DE_DATOS.PEDIDOS_CUPON
-END
-GO
-
 
 -- FALTA MIGRAR OTRAS TABLAS EXTRAS
 
@@ -707,6 +683,26 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_RECLAMOS
 		  END
 GO
 
+--Hechos cupones
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_CUPONES_DESCUENTO
+AS
+BEGIN
+	INSERT INTO D_DE_DATOS.BI_CUPONES_DESCUENTO(cod_cupon,cod_cupon_anterior,cod_usuario,monto_cupon,fecha_alta_cupon,fecha_vencimiento_cupon,cod_tipo_cupon)
+	SELECT cod_cupon,cod_cupon_anterior,cod_usuario,monto_cupon,fecha_alta_cupon,fecha_vencimiento_cupon,cod_tipo_cupon
+	FROM D_DE_DATOS.CUPONES_DESCUENTO
+END
+GO
+
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS_CUPON
+AS
+BEGIN
+	INSERT INTO D_DE_DATOS.BI_PEDIDOS_CUPON(cod_pedido,cod_cupon)
+	SELECT cod_pedido,cod_cupon
+	FROM D_DE_DATOS.PEDIDOS_CUPON
+END
+GO
+
+-- FALTA MIGRAR OTRAS TABLAS DE HECHOS
 
 --------------------------------------------------------------------------------
 
