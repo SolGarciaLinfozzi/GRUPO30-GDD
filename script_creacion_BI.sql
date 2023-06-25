@@ -158,6 +158,7 @@ CREATE TABLE D_DE_DATOS.BI_MEDIOS_PAGO (
 
 -- Hechos pedidos
 CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
+	cod_usuario INT NOT NULL,
 	cod_pedido DECIMAL(18,0) PRIMARY KEY,
 	cod_dia_pedido INT NOT NULL,
 	cod_tiempo_pedido INT NOT NULL,
@@ -172,6 +173,7 @@ CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
 	total_descuentos DECIMAL(18,2) NOT NULL,
 	calificacion_pedido DECIMAL(18,0) NULL,
 	cod_estado_pedido INT NOT NULL
+	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.BI_USUARIOS,
 	FOREIGN KEY (cod_local) REFERENCES D_DE_DATOS.BI_LOCALES,
 	FOREIGN KEY (cod_tiempo_pedido) REFERENCES D_DE_DATOS.BI_TIEMPO,
 	FOREIGN KEY (cod_tiempo_entrega) REFERENCES D_DE_DATOS.BI_TIEMPO,
@@ -593,7 +595,8 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
  AS
   BEGIN
     INSERT INTO D_DE_DATOS.BI_PEDIDOS
-	(cod_pedido,
+	(cod_usuario,
+	cod_pedido,
 	cod_dia_pedido,
 	cod_tiempo_pedido,
 	rango_horario_pedido,
@@ -609,6 +612,7 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
 	cod_estado_pedido
 	)
 		SELECT 
+		  cod_usuario,
 		  cod_pedido,
 		  D.cod_dia,
 		  T.cod_tiempo,
