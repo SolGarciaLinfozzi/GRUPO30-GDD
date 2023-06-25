@@ -990,7 +990,7 @@ GO
 -- Promedio mensual del valor asegurado (valor declarado por el usuario) de los paquetes enviados
 -- a través del servicio de mensajería en función del tipo de paquete. 
 
-CREATE VIEW BI_D_DE_DATOS_PROMEDIO_VALOR_ASEGURADO2
+CREATE VIEW D_DE_DATOS_PROMEDIO_VALOR_ASEGURADO
 AS
 SELECT 
 	T.tiempo_mes AS Mes,
@@ -1011,7 +1011,7 @@ GO
 -- día de la semana y rango horario.
 -- mes | local | diaSemana | rangoHorario | cantidadReclamos
 
- CREATE VIEW BI_D_DE_DATOS.CANTIDAD_RECLAMOS
+ CREATE VIEW D_DE_DATOS.CANTIDAD_RECLAMOS
  AS
      SELECT T.tiempo_mes, L.desc_local, R.dia_inicio_reclamo, R.rango_horario_inicio_reclamo,
      (SELECT COUNT(*) FROM R) cantidadReclamos
@@ -1033,7 +1033,7 @@ GO
 -- que se resolvió. /*NOS FALTA TIPO RECLAMO. PARA RESOLVER COMO PIDE NECESITARIAMOS LA HORA EXACTA DE INICIO Y 
 /*RESOLUCION DEL RECLAMO. POR AHORA SOLO TENEMOS EL RANGO HORARIO */
 
-CREATE VIEW BI_D_DE_DATOS_PROMEDIO_TIEMPO_SOLUCION_RECLAMOS
+CREATE VIEW D_DE_DATOS_PROMEDIO_TIEMPO_SOLUCION_RECLAMOS
 AS
 	SELECT T.tiempo_mes, TR.desc_tipo_reclamo, RE.desc_rango_etario, 
 	((SELECT SUM(hora_fin_reclamo - hora_inicio_reclamo) FROM R) / (SELECT COUNT(*) FROM R)) promedio
@@ -1049,7 +1049,7 @@ GO
 --VISTA 11
 -- Monto mensual generado en cupones a partir de reclamos. /*NOS FALTAN CUPONES*/
 
-CREATE VIEW BI_D_DE_DATOS_CUPONES_RECLAMOS
+CREATE VIEW D_DE_DATOS_CUPONES_RECLAMOS
 AS
 	SELECT T.tiempo_mes, SUM(C.monto_cupon) sumaMontoCupones
 	FROM D_DE_DATOS.BI_CUPONES C
@@ -1067,4 +1067,6 @@ SELECT * FROM D_DE_DATOS.PROMEDIO_PRECIO_ENVIOS_POR_LOCALIDAD;
 --falta vista 4
 SELECT * FROM D_DE_DATOS.MONTO_TOTAL_CUPONES;
 SELECT * FROM D_DE_DATOS.PROMEDIO_CALIFICACION_MENSUAL_POR_LOCAL;
+SELECT * FROM D_DE_DATOS.PORCENTAJE_PEDIDOS_Y_ENVIOS_ENTREGADOS;
+SELECT * FROM D_DE_DATOS.PROMEDIO_VALOR_ASEGURADO;
 
