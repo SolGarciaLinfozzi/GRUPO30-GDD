@@ -706,7 +706,15 @@ BEGIN
 END
 GO
 
--- FALTA MIGRAR OTRAS TABLAS DE HECHOS
+-- Hechos servicios de mensajería
+CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_SERVICIOS_MENSAJERIA
+AS
+BEGIN
+	INSERT INTO D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (cod_mensajeria,cod_usuario,fecha_mensajeria , direccion_origen_mensajeria , direccion_destino_mensajeria ,cod_localidad, km_mensajeria ,cod_tipo_paquete, valor_asegurado_mensajeria , observaciones_mensajeria , precio_envio_mensajeria  , precio_seguro_mensajeria  ,cod_repartidor, propina_mensajeria,cod_medio_pago, total_mensajeria  , cod_estado_mensajeria, tiempo_entrega_estimado_mensajeria  , fecha_entrega_mensajeria ,calificacion_mensajeria  )
+	SELECT cod_mensajeria,cod_usuario,fecha_mensajeria , direccion_origen_mensajeria , direccion_destino_mensajeria ,cod_localidad, km_mensajeria ,cod_tipo_paquete, valor_asegurado_mensajeria , observaciones_mensajeria , precio_envio_mensajeria  , precio_seguro_mensajeria  ,cod_repartidor, propina_mensajeria,cod_medio_pago, total_mensajeria  , cod_estado_mensajeria, tiempo_entrega_estimado_mensajeria  , fecha_entrega_mensajeria ,calificacion_mensajeria 
+	FROM D_DE_DATOS.SERVICIOS_MENSAJERIA
+END
+GO
 
 --------------------------------------------------------------------------------
 
@@ -896,10 +904,12 @@ GO
  -------------------------------------------------------
 
 --VISTA 7
--- Porcentaje de pedidos y mensajería entregados mensualmente según el
--- rango etario de los repartidores y la localidad.
+-- Porcentaje de pedidos y mensajería entregados mensualmente 
+-- según el rango etario de los repartidores y la localidad
+
 -- Este indicador se debe tener en cuenta y sumar tanto los envíos de pedidos
 -- como los de mensajería.
+
 -- El porcentaje se calcula en función del total general de pedidos y envíos
 -- mensuales entregados. /*HECHO SOLO PARA PEDIDOS*/
 
