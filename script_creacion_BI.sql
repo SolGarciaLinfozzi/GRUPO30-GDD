@@ -187,7 +187,7 @@ CREATE TABLE D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (
 	cod_estado_mensajeria INT NOT NULL,
 	tiempo_entrega_estimado_mensajeria  DECIMAL(18,2) NOT NULL,
 	fecha_entrega_mensajeria DATETIME2(3) NULL,
-	calificacion_mensajeria DECIMAL(18,2) NULL,
+	calificacion_mensajeria DECIMAL(18,2) NULL
 	FOREIGN KEY (cod_usuario) REFERENCES D_DE_DATOS.usuarios,
 	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades,
 	FOREIGN KEY (cod_tipo_paquete) REFERENCES D_DE_DATOS.tipos_paquetes,
@@ -215,11 +215,13 @@ CREATE TABLE D_DE_DATOS.BI_PEDIDOS (
 	total_pedido DECIMAL(18,2) NOT NULL,
 	total_descuentos DECIMAL(18,2) NOT NULL,
 	calificacion_pedido DECIMAL(18,0) NULL,
+	cod_estado_pedido INT NOT NULL
 	FOREIGN KEY (cod_local) REFERENCES D_DE_DATOS.BI_LOCALES,
 	FOREIGN KEY (cod_tiempo_pedido) REFERENCES D_DE_DATOS.BI_TIEMPO,
 	FOREIGN KEY (cod_tiempo_entrega) REFERENCES D_DE_DATOS.BI_TIEMPO,
 	FOREIGN KEY (cod_dia_pedido) REFERENCES D_DE_DATOS.BI_DIAS,
-	FOREIGN KEY (cod_dia_entrega) REFERENCES D_DE_DATOS.BI_DIAS
+	FOREIGN KEY (cod_dia_entrega) REFERENCES D_DE_DATOS.BI_DIAS,
+	FOREIGN KEY (cod_estado_pedido) REFERENCES D_DE_DATOS.BI_ESTADOS_PEDIDOS
 );
 
 -- Hechos envios
@@ -573,7 +575,7 @@ GO
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
  AS
   BEGIN
-    INSERT INTO D_DE_DATOS.BI_PEDIDOS 
+    INSERT INTO D_DE_DATOS.BI_PEDIDOS
 	(cod_pedido,
 	cod_dia_pedido,
 	cod_tiempo_pedido,
@@ -586,7 +588,8 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
 	total_productos_pedido,
 	total_pedido,
 	total_descuentos,
-	calificacion_pedido
+	calificacion_pedido,
+	cod_estado_pedido
 	)
 		SELECT 
 		  cod_pedido,
@@ -601,7 +604,8 @@ CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
 		  total_productos_pedido,
 		  total_pedido,
 		  total_descuentos,
-		  calificacion_pedido
+		  calificacion_pedido,
+		  cod_estado_pedido
 		  FROM D_DE_DATOS.PEDIDOS P
 		  INNER JOIN D_DE_DATOS.BI_TIEMPO T ON T.tiempo_anio = YEAR(P.fecha_pedido) AND T.tiempo_mes = MONTH(P.fecha_pedido)
 		  INNER JOIN D_DE_DATOS.BI_TIEMPO T2 ON T2.tiempo_anio = YEAR(P.fecha_entrega_pedido) AND T2.tiempo_mes = MONTH(P.fecha_entrega_pedido)
