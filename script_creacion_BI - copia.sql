@@ -423,6 +423,7 @@ GO
 
 ---------------- MIGRACIONES A HECHOS ----------------
 
+DELETE FROM D_DE_DATOS.BI_PEDIDOS
 
 CREATE PROCEDURE D_DE_DATOS.MIGRAR_BI_PEDIDOS
  AS
@@ -540,31 +541,30 @@ BEGIN
 		cod_tiempo_mensajeria,
 		cod_localidad, 
 		cod_tipo_paquete,
+		valor_asegurado_mensajeria ,
 		cod_rango_etario_repartidor,
 		cod_estado_mensajeria,
-		total_valor_asegurado_mensajeria
-		--total_desvio_tiempo_entrega
-		)
+		tiempo_entrega_estimado_mensajeria  ,
+		cod_tiempo_entrega_mensajeria ,
+		fecha_mensajeria,
+		fecha_entrega_mensajeria  )
 	SELECT 
 	D.cod_dia,
 	T.cod_tiempo,
 	S.cod_localidad,
 	cod_tipo_paquete, 
+	valor_asegurado_mensajeria , 
 	D_DE_DATOS.CALCULAR_RANGO_ETARIO(R.fecha_nacimiento_repartidor), 
 	cod_estado_mensajeria,
-	SUM(valor_asegurado_mensajeria)
-	--D_DE_DATOS.CALCULAR_DESVIO_ENTREGA()
+	tiempo_entrega_estimado_mensajeria  , 
+	T2.cod_tiempo,
+	fecha_mensajeria,
+	fecha_entrega_mensajeria
 	FROM D_DE_DATOS.SERVICIOS_MENSAJERIA S
 	INNER JOIN D_DE_DATOS.BI_TIEMPO T ON T.tiempo_anio = YEAR(fecha_mensajeria) AND T.tiempo_mes = MONTH(fecha_mensajeria)
+	INNER JOIN D_DE_DATOS.BI_TIEMPO T2 ON T2.tiempo_anio = YEAR(fecha_entrega_mensajeria) AND T2.tiempo_mes = MONTH(fecha_entrega_mensajeria)
 	INNER JOIN D_DE_DATOS.BI_DIAS D ON D.desc_dia = D_DE_DATOS.CALCULAR_DIA_SEMANA(fecha_mensajeria)
 	INNER JOIN D_DE_DATOS.REPARTIDORES R ON R.cod_repartidor = S.cod_repartidor
-	GROUP BY
-	D.cod_dia,
-	T.cod_tiempo,
-	S.cod_localidad,
-	cod_tipo_paquete, 
-	D_DE_DATOS.CALCULAR_RANGO_ETARIO(R.fecha_nacimiento_repartidor), 
-	cod_estado_mensajeria
 END
 GO
 
@@ -747,7 +747,7 @@ CREATE TABLE D_DE_DATOS.BI_SERVICIOS_MENSAJERIA (
 	cod_estado_mensajeria INT NOT NULL,
 	--cod_tiempo_entrega_mensajeria INT NOT NULL,
 	total_valor_asegurado_mensajeria DECIMAL(18,2) NOT NULL,
-	total_desvio_tiempo_entrega  DECIMAL(18,2)  NULL,
+	total_desvio_tiempo_entrega  DECIMAL(18,2) NOT NULL,
 	--cantidad_envios INT NOT NULL
 	FOREIGN KEY (cod_localidad) REFERENCES D_DE_DATOS.localidades,
 	FOREIGN KEY (cod_tipo_paquete) REFERENCES D_DE_DATOS.tipos_paquetes,
@@ -774,12 +774,12 @@ EXECUTE D_DE_DATOS.MIGRAR_BI_TIPOS_PAQUETES;
 EXECUTE D_DE_DATOS.MIGRAR_BI_ESTADOS_PEDIDOS;
 EXECUTE D_DE_DATOS.MIGRAR_ESTADOS_MENSAJERIA;
 EXECUTE D_DE_DATOS.MIGRAR_BI_TIPOS_RECLAMOS;
-EXECUTE D_DE_DATOS.MIGRAR_BI_PEDIDOS;
-EXECUTE D_DE_DATOS.MIGRAR_BI_RECLAMOS;
+-- D_DE_DATOS.MIGRAR_BI_PEDIDOS;
+--EXECUTE D_DE_DATOS.MIGRAR_BI_RECLAMOS;
 --EXECUTE D_DE_DATOS.MIGRAR_BI_CUPONES_DESCUENTO;
 --EXECUTE D_DE_DATOS.MIGRAR_BI_PEDIDOS_CUPON;
 --EXECUTE D_DE_DATOS.MIGRAR_BI_RECLAMOS_CUPON;
-EXECUTE D_DE_DATOS.MIGRAR_BI_SERVICIOS_MENSAJERIA;
+--EXECUTE D_DE_DATOS.MIGRAR_BI_SERVICIOS_MENSAJERIA;
 
 PRINT 'Migracion finalizada exitosamente'
 GO 

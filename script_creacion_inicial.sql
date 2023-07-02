@@ -1,8 +1,131 @@
 USE [GD1C2023]
 GO
-
 CREATE SCHEMA [D_DE_DATOS]
 GO
+
+--drop procedures
+
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarUsuarios')
+	DROP PROCEDURE D_DE_DATOS.MigrarUsuarios;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarDias')
+	DROP PROCEDURE D_DE_DATOS.MigrarDias;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarTiposCupones')
+	DROP PROCEDURE D_DE_DATOS.MigrarTiposCupones;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarTiposLocales')
+	DROP PROCEDURE D_DE_DATOS.MigrarTiposLocales;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarCategoriasLocales')
+	DROP PROCEDURE D_DE_DATOS.MigrarCategoriasLocales;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarTiposMediosPago')
+	DROP PROCEDURE D_DE_DATOS.MigrarTiposMediosPago;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarTiposMovilidad')
+	DROP PROCEDURE D_DE_DATOS.MigrarTiposMovilidad;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarTiposPaquetes')
+	DROP PROCEDURE D_DE_DATOS.MigrarTiposPaquetes;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarTiposReclamos')
+	DROP PROCEDURE D_DE_DATOS.MigrarTiposReclamos;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarEstadosPedidos')
+	DROP PROCEDURE D_DE_DATOS.MigrarEstadosPedidos;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarEstadosMensajeria')
+	DROP PROCEDURE D_DE_DATOS.MigrarEstadosMensajeria;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarEstadosReclamos')
+	DROP PROCEDURE D_DE_DATOS.MigrarEstadosReclamos;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarLocalidades')
+	DROP PROCEDURE D_DE_DATOS.MigrarLocalidades;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarOperadores')
+	DROP PROCEDURE D_DE_DATOS.MigrarOperadores;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarDireccionesUsuarios')
+	DROP PROCEDURE D_DE_DATOS.MigrarDireccionesUsuarios;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarMediosPago')
+	DROP PROCEDURE D_DE_DATOS.MigrarMediosPago;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarLocales')
+	DROP PROCEDURE D_DE_DATOS.MigrarLocales;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarHorariosLocales')
+	DROP PROCEDURE D_DE_DATOS.MigrarHorariosLocales;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarProductosLocales')
+	DROP PROCEDURE D_DE_DATOS.MigrarProductosLocales;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarRepartidores')
+	DROP PROCEDURE D_DE_DATOS.MigrarRepartidores;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarPedidos')
+	DROP PROCEDURE D_DE_DATOS.MigrarPedidos;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarItems')
+	DROP PROCEDURE D_DE_DATOS.MigrarItems;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarCuponesDescuento')
+	DROP PROCEDURE D_DE_DATOS.MigrarCuponesDescuento;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarPedidosCupon')
+	DROP PROCEDURE D_DE_DATOS.MigrarPedidosCupon;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarReclamos')
+	DROP PROCEDURE D_DE_DATOS.MigrarReclamos;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarReclamosCupon')
+	DROP PROCEDURE D_DE_DATOS.MigrarReclamosCupon;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarServiciosMensajeria')
+	DROP PROCEDURE D_DE_DATOS.MigrarServiciosMensajeria;
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'MigrarEnvios')
+	DROP PROCEDURE D_DE_DATOS.MigrarEnvios;
+GO
+
+--Drops tablas
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'SERVICIOS_MENSAJERIA')
+    DROP TABLE D_DE_DATOS.SERVICIOS_MENSAJERIA;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'ESTADOS_MENSAJERIA')
+    DROP TABLE D_DE_DATOS.ESTADOS_MENSAJERIA;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'PEDIDOS_CUPON')
+    DROP TABLE D_DE_DATOS.PEDIDOS_CUPON;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'RECLAMOS_CUPON')
+    DROP TABLE D_DE_DATOS.RECLAMOS_CUPON;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'CUPONES_DESCUENTO')
+    DROP TABLE D_DE_DATOS.CUPONES_DESCUENTO;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'TIPOS_CUPONES')
+    DROP TABLE D_DE_DATOS.TIPOS_CUPONES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'RECLAMOS')
+    DROP TABLE D_DE_DATOS.RECLAMOS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'ESTADOS_RECLAMOS')
+    DROP TABLE D_DE_DATOS.ESTADOS_RECLAMOS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'TIPOS_RECLAMOS')
+    DROP TABLE D_DE_DATOS.TIPOS_RECLAMOS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'OPERADORES')
+    DROP TABLE D_DE_DATOS.OPERADORES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'ITEMS')
+    DROP TABLE D_DE_DATOS.ITEMS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'PRODUCTOS_LOCALES')
+    DROP TABLE D_DE_DATOS.PRODUCTOS_LOCALES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'ENVIOS')
+    DROP TABLE D_DE_DATOS.ENVIOS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'PEDIDOS')
+    DROP TABLE D_DE_DATOS.PEDIDOS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'ESTADOS_PEDIDOS')
+    DROP TABLE D_DE_DATOS.ESTADOS_PEDIDOS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'HORARIOS_LOCALES')
+    DROP TABLE D_DE_DATOS.HORARIOS_LOCALES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'DIAS')
+    DROP TABLE D_DE_DATOS.DIAS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'LOCALES')
+    DROP TABLE D_DE_DATOS.LOCALES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'CATEGORIAS_LOCALES')
+    DROP TABLE D_DE_DATOS.CATEGORIAS_LOCALES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'TIPOS_LOCALES')
+    DROP TABLE D_DE_DATOS.TIPOS_LOCALES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'MEDIOS_PAGO')
+    DROP TABLE D_DE_DATOS.MEDIOS_PAGO;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'TIPOS_MEDIOS_PAGO')
+    DROP TABLE D_DE_DATOS.TIPOS_MEDIOS_PAGO;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'DIRECCIONES_USUARIOS')
+    DROP TABLE D_DE_DATOS.DIRECCIONES_USUARIOS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'USUARIOS')
+    DROP TABLE D_DE_DATOS.USUARIOS;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'TIPOS_PAQUETES')
+    DROP TABLE D_DE_DATOS.TIPOS_PAQUETES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'REPARTIDORES')
+    DROP TABLE D_DE_DATOS.REPARTIDORES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'TIPOS_MOVILIDAD')
+    DROP TABLE D_DE_DATOS.TIPOS_MOVILIDAD;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'LOCALIDADES')
+    DROP TABLE D_DE_DATOS.LOCALIDADES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'LOCALIDADES')
+    DROP TABLE D_DE_DATOS.LOCALIDADES;
+IF EXISTS(SELECT [name] FROM sys.tables WHERE [name] = 'CATEGORIAS_LOCALES')
+    DROP TABLE D_DE_DATOS.CATEGORIAS_LOCALES;
+GO
+
 
 -- MIGRACION DE DATOS
 
@@ -42,6 +165,22 @@ BEGIN
 	SELECT DISTINCT LOCAL_TIPO
 	FROM gd_esquema.Maestra
 	WHERE LOCAL_TIPO IS NOT NULL;
+END
+GO
+
+CREATE PROCEDURE D_DE_DATOS.MigrarCategoriasLocales
+AS
+BEGIN 
+INSERT INTO D_DE_DATOS.CATEGORIAS_LOCALES(desc_categoria_local)
+	VALUES('Parrilla')
+INSERT INTO D_DE_DATOS.CATEGORIAS_LOCALES(desc_categoria_local)
+	VALUES('Heladería')
+INSERT INTO D_DE_DATOS.CATEGORIAS_LOCALES(desc_categoria_local)
+	VALUES('Comidas rápidas')
+INSERT INTO D_DE_DATOS.CATEGORIAS_LOCALES(desc_categoria_local)
+	VALUES('Kiosco')
+INSERT INTO D_DE_DATOS.CATEGORIAS_LOCALES(desc_categoria_local)
+	VALUES('Supermercado')
 END
 GO
 
@@ -123,7 +262,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE D_DE_DATOS.MigrarEstadosLocalidades
+CREATE PROCEDURE D_DE_DATOS.MigrarLocalidades
 AS
 BEGIN
 	INSERT INTO D_DE_DATOS.LOCALIDADES(nombre_localidad, provincia_localidad)
@@ -519,7 +658,6 @@ CREATE TABLE D_DE_DATOS.TIPOS_LOCALES (
     cod_tipo_local INT IDENTITY(1,1) PRIMARY KEY,
 	desc_tipo_local NVARCHAR(50) NOT NULL
 );
-
 CREATE TABLE D_DE_DATOS.CATEGORIAS_LOCALES (
     cod_categoria_local INT IDENTITY(1,1) PRIMARY KEY,
 	desc_categoria_local NVARCHAR(50) NOT NULL
@@ -733,11 +871,20 @@ CREATE TABLE D_DE_DATOS.SERVICIOS_MENSAJERIA (
 	FOREIGN KEY (cod_estado_mensajeria) REFERENCES D_DE_DATOS.estados_mensajeria
 );
 
+-- CREACION DE INDICES 
+
+CREATE INDEX IDX_ENVIO_USUARIO
+ON D_DE_DATOS.SERVICIOS_MENSAJERIA(cod_usuario,cod_mensajeria);
+
+CREATE INDEX IDX_REPARTIDOR
+ON D_DE_DATOS.SERVICIOS_MENSAJERIA(cod_repartidor, cod_mensajeria)
+
 -- Ejecucion de los Stored Procedures
 
 EXECUTE D_DE_DATOS.MigrarUsuarios;
 EXECUTE D_DE_DATOS.MigrarTiposCupones;
 EXECUTE D_DE_DATOS.MigrarTiposLocales;
+EXECUTE D_DE_DATOS.MigrarCategoriasLocales;
 EXECUTE D_DE_DATOS.MigrarTiposMediosPago;
 EXECUTE D_DE_DATOS.MigrarTiposMovilidad;
 EXECUTE D_DE_DATOS.MigrarTiposPaquetes;
@@ -745,7 +892,7 @@ EXECUTE D_DE_DATOS.MigrarTiposReclamos;
 EXECUTE D_DE_DATOS.MigrarEstadosPedidos;
 EXECUTE D_DE_DATOS.MigrarEstadosMensajeria;
 EXECUTE D_DE_DATOS.MigrarEstadosReclamos;
-EXECUTE D_DE_DATOS.MigrarEstadosLocalidades;
+EXECUTE D_DE_DATOS.MigrarLocalidades;
 EXECUTE D_DE_DATOS.MigrarDias;
 EXECUTE D_DE_DATOS.MigrarOperadores;
 EXECUTE D_DE_DATOS.MigrarDireccionesUsuarios;
@@ -766,10 +913,4 @@ EXECUTE D_DE_DATOS.MigrarEnvios;
 PRINT 'Migracion finalizada exitosamente'
 GO 
 
--- CREACION DE INDICES 
 
-CREATE INDEX IDX_ENVIO_USUARIO
-ON D_DE_DATOS.SERVICIOS_MENSAJERIA(cod_usuario,cod_mensajeria);
-
-CREATE INDEX IDX_REPARTIDOR
-ON D_DE_DATOS.SERVICIOS_MENSAJERIA(cod_repartidor, cod_mensajeria)
